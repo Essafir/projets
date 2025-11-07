@@ -1,0 +1,27 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f5f5f5; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        h2 { color: #34495e; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        #formulaire-tache, #conteneur-taches { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        #form-ajout-tache { display: grid; gap: 20px; }
+        .groupe-formulaire { display: flex; flex-direction: column; }
+        label { font-weight: 600; margin-bottom: 8px; color: #2c3e50; }
+        input, select, textarea { padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3498db; }
+        textarea { resize: vertical; min-height: 80px; }
+        small { color: #7f8c8d; font-size: 0.9em; margin-top: 5px; }
+        #id-genere { background: #ecf0f1; padding: 12px; border-radius: 6px; font-weight: bold; color: #2c3e50; border: 2px dashed #bdc3c7; }
+        button { background: #3498db; color: white; padding: 15px 30px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        #tableau-taches { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #tableau-taches th { background: #34495e; color: white; padding: 15px; text-align: left; font-weight: 600; }
+        #tableau-taches td { padding: 15px; border-bottom: 1px solid #ecf0f1; }
+        #tableau-taches tr:hover { background-color: #f8f9fa; }
+        #tableau-taches td:first-child { font-weight: bold; color: #e74c3c; text-align: center; }
+        #tableau-taches td:nth-child(3) { text-align: center; font-weight: bold; color: #27ae60; }
+        #tableau-taches td:nth-child(4) { text-align: center; }
+        #tableau-taches td:last-child { text-align: center; }
+        #tableau-taches button { background: #e74c3c; padding: 8px 16px; font-size: 14px; }
+        #tableau-taches button:hover { background: #c0392b; }
+        .badge-duree { background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; }
+  
