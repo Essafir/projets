@@ -82,6 +82,12 @@
             calculateButton.addEventListener('click', calculateMoyen);
             resetButton.addEventListener('click', resetApp);
             
+            //note betwen 0 & 20
+            document.querySelector('.note-input').addEventListener('input', function () {
+                    let value = parseFloat(this.value);
+                    if (value > 20) this.value = 20;
+                    if (value < 0) this.value = 0;
+                    });
             // --- Event Delegation for delete buttons ---
             // Listen for clicks on the entire container
             notesContainer.addEventListener('click', (event) => {
@@ -90,7 +96,7 @@
                     deleteNoteRow(event.target);
                 }
             });
-
+            
             function addNoteRow() {
                 const rowId = rowCounter++;
                 const entryDiv = document.createElement('div');
