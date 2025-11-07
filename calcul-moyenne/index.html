@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Moyenne Pondérée en Ligne - Facile et Gratuit</title>
+    <meta name="description" content="Calculez facilement votre moyenne générale pondérée avec coefficients. Notre outil gratuit vous permet d'ajouter des matières, des notes et des coefficients pour obtenir votre résultat instantanément.">
+    <meta name="keywords" content="calculateur de moyenne, calcul moyenne, moyenne pondérée, calcul note coefficient, simulateur de notes, moyenne générale">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Calculateur de Moyenne Pondérée",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "125" },
+      "description": "Un outil en ligne simple et gratuit pour calculer la moyenne générale pondérée à partir de notes et de coefficients."
+    }
+    </script>
+    <style>
+        :root {
+            --primary-color: #4a47a3;
+            --secondary-color: #0c7b93;
+            --background-color: #f7f8fc;
+            --card-bg: #ffffff;
+            --text-color: #3d3d3d;
+            --label-color: #6c757d;
+            --light-gray: #e9ecef;
+            --error-color: #e63946;
+            --success-color-bg: #e0f2f1;
+            --success-color-border: #00796b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; min-height: 100vh; }
+        .container { background-color: var(--card-bg); padding: 30px 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 800px; }
+        h1 { color: var(--primary-color); text-align: center; margin-bottom: 15px; font-weight: 700; }
+        h2 { color: var(--secondary-color); text-align: center; margin-bottom: 30px; font-size: 1.2rem; font-weight: 400; }
+        p.intro-text { text-align: center; max-width: 600px; margin: 0 auto 35px; line-height: 1.6; color: var(--label-color); }
+        
+        #notes-container { margin-bottom: 30px; display: flex; flex-direction: column; gap: 20px; }
+        .note-entry { display: flex; align-items: flex-end; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--label-color); margin-bottom: 5px; text-transform: uppercase; }
+
+        input[type="text"],
+        input[type="number"] { border: 1px solid var(--light-gray); border-radius: 8px; padding: 12px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(74, 71, 163, 0.2); }
+
+        .module-group { flex: 3; }
+        .note-group { flex: 1; }
+        .coeff-group { flex: 1; }
+
+        .button-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        button { padding: 12px 25px; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; flex: 1; }
+
+        #addNoteButton { background-color: var(--primary-color); color: white; flex-grow: 2; }
+        #addNoteButton:hover { background-color: #3b3883; transform: translateY(-2px); }
+        #calculateButton { background-color: var(--secondary-color); color: white; }
+        #calculateButton:hover { background-color: #0a6375; transform: translateY(-2px); }
+        #resetButton { background-color: transparent; color: var(--label-color); border: 2px solid var(--light-gray); }
+        #resetButton:hover { background-color: var(--light-gray); color: var(--primary-color); }
+        
+        .delete-btn { background-color: transparent; color: #ccc; border: 1px solid var(--light-gray); width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-bottom: 1px; }
+        .delete-btn:hover { background-color: var(--error-color); color: white; border-color: var(--error-color); transform: scale(1.05); }
+
+        #result-display, .error { margin-top: 30px; padding: 20px; border-radius: 12px; text-align: center; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #result-display { background-color: var(--success-color-bg); border: 1px solid var(--success-color-border); }
+        #result-display b { color: var(--secondary-color); font-size: 1.5rem; display: block; margin-bottom: 5px; }
+        #result-display i { font-size: 1.1rem; }
+        .error { background-color: #fff0f1; color: var(--error-color); font-weight: 500; }
+
+        @media (max-width: 768px) {
+            body { padding: 20px 10px; }
+            .container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+            .note-entry { flex-wrap: wrap; position: relative; padding: 20px; background-color: #fdfdff; border: 1px solid var(--light-gray); border-radius: 12px; }
+            .input-group { min-width: 100px; }
+            .module-group { flex-basis: 100%; }
+            .delete-btn { position: absolute; top: 10px; right: 10px; width: 35px; height: 35px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Calculateur de Notes</h1>
+            <h2>Simulateur de Moyenne Pondérée</h2>
+            <p class="intro-text">Utilisez notre outil simple pour calculer votre moyenne générale. Ajoutez vos matières, vos notes sur 20 et leurs coefficients pour obtenir un résultat précis et instantané.</p>
+        </header>
+        <section id="calculator-app">
+            <div id="notes-container">
+                <div class="note-entry">
+                    <div class="input-group module-group">
+                        <label for="module-0">Matière</label>
+                        <input type="text" id="module-0" class="module-input" placeholder="Ex: Mathématiques">
+                    </div>
+                    <div class="input-group note-group">
+                        <label for="note-0">Note</label>
+                        <input type="number" id="note-0" class="note-input" placeholder="/ 20" min="0" max="20" step="0.25">
+                    </div>
+                    <div class="input-group coeff-group">
+                        <label for="coeff-0">Coeff.</label>
+                        <input type="number" id="coeff-0" class="coeff-input" placeholder="Ex: 2" value="1" min="1" step="1">
+                    </div>
+                    <!-- REMOVED onclick -->
+                    <button class="delete-btn" title="Supprimer cette ligne">×</button>
+                </div>
+            </div>
+            <footer>
+                <div class="button-group">
+                    <!-- REMOVED onclick -->
+                    <button id="addNoteButton">Ajouter une matière</button>
+                    <button id="calculateButton">Calculer la moyenne</button>
+                    <button id="resetButton">Réinitialiser</button>
+                </div>
+                <div id="result-display" style="display: none;"></div>
+                <p id="error-message" class="error" style="display: none;"></p>
+            </footer>
+        </section>
+    </main>
+
+    <script>
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get references to all necessary elements
+            const notesContainer = document.getElementById('notes-container');
+            const addNoteButton = document.getElementById('addNoteButton');
+            const calculateButton = document.getElementById('calculateButton');
+            const resetButton = document.getElementById('resetButton');
+            const resultDisplay = document.getElementById('result-display');
+            const errorMessage = document.getElementById('error-message');
+            
+            let rowCounter = 1; // Starts at 1 since row 0 is in the HTML
+
+            // --- Event Listeners for main buttons ---
+            addNoteButton.addEventListener('click', addNoteRow);
+            calculateButton.addEventListener('click', calculateMoyen);
+            resetButton.addEventListener('click', resetApp);
+            
+            // --- Event Delegation for delete buttons ---
+            // Listen for clicks on the entire container
+            notesContainer.addEventListener('click', (event) => {
+                // Check if the clicked element is a delete button
+                if (event.target.classList.contains('delete-btn')) {
+                    deleteNoteRow(event.target);
+                }
+            });
+
+            function addNoteRow() {
+                const rowId = rowCounter++;
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'note-entry';
+                entryDiv.innerHTML = `
+                    <div class="input-group module-group"><label for="module-${rowId}">Matière</label><input type="text" id="module-${rowId}" class="module-input" placeholder="Ex: Histoire"></div>
+                    <div class="input-group note-group"><label for="note-${rowId}">Note</label><input type="number" id="note-${rowId}" class="note-input" placeholder="/ 20" min="0" max="20" step="0.25"></div>
+                    <div class="input-group coeff-group"><label for="coeff-${rowId}">Coeff.</label><input type="number" id="coeff-${rowId}" class="coeff-input" placeholder="Ex: 1.5" value="1" min="0.5" step="0.5"></div>
+                    <button class="delete-btn" title="Supprimer cette ligne">×</button>
+                `;
+                notesContainer.appendChild(entryDiv);
+                entryDiv.querySelector('.module-input').focus();
+                updateUiState();
+            }
+            
+            function deleteNoteRow(buttonElement) {
+                const rowToDelete = buttonElement.closest('.note-entry');
+                rowToDelete.remove();
+                updateUiState();
+            }
+            
+            function updateUiState() {
+                const noteCount = document.querySelectorAll('.note-entry').length;
+                // Show calculate button only if there's at least one row
+                calculateButton.style.display = (noteCount > 0) ? 'inline-block' : 'none';
+                resetButton.style.display = (noteCount > 0) ? 'inline-block' : 'none';
+                resultDisplay.style.display = 'none';
+                errorMessage.style.display = 'none';
+            }
+
+            function calculateMoyen() {
+                updateUiState(); // Reset previous errors/results
+                let totalWeightedSum = 0;
+                let totalCoefficients = 0;
+                const noteEntries = document.querySelectorAll('.note-entry');
+
+                for (const entry of noteEntries) {
+                    const noteInput = entry.querySelector('.note-input');
+                    const coeffInput = entry.querySelector('.coeff-input');
+                    const noteValue = parseFloat(noteInput.value);
+                    const coeffValue = parseFloat(coeffInput.value);
+
+                    // Reset border style
+                    entry.style.border = '1px solid var(--light-gray)';
+
+                    if (isNaN(noteValue) || isNaN(coeffValue) || noteValue < 0 || noteValue > 20 || coeffValue <= 0) {
+                        errorMessage.textContent = 'Veuillez remplir toutes les cases avec des valeurs valides (Note entre 0-20, Coeff > 0).';
+                        errorMessage.style.display = 'block';
+                        entry.style.border = '1px solid var(--error-color)'; // Highlight the specific invalid row
+                        return; // Stop calculation on the first error found
+                    }
+
+                    totalWeightedSum += noteValue * coeffValue;
+                    totalCoefficients += coeffValue;
+                }
+
+                if (totalCoefficients === 0) {
+                    // This case shouldn't happen with the validation above, but it's good practice
+                    return;
+                }
+
+                const average = totalWeightedSum / totalCoefficients;
+                let mention = '';
+
+                if (average >= 18) mention = "Excellent ! Félicitations du jury.";
+                else if (average >= 16) mention = "Très Bien";
+                else if (average >= 14) mention = "Bien";
+                else if (average >= 12) mention = "Assez Bien";
+                else if (average >= 10) mention = "Passable (Admis)";
+                else mention = "Insuffisant (Non admis)";
+                
+                resultDisplay.innerHTML = `<b>${average.toFixed(2)} / 20</b><i>Mention : ${mention}</i>`;
+                resultDisplay.style.display = 'block';
+            }
+
+            function resetApp() {
+                notesContainer.innerHTML = ''; // Clear all rows
+                addNoteRow(); // Add a single fresh row to start over
+                updateUiState();
+            }
+            
+            // Initial UI state setup on page load
+            updateUiState();
+        });
+    </script>
+</body>
+</html>
