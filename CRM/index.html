@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini CRM - Gestion des Clients</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <link rel="stylesheet" href="../assets/styles/CRM/style_index_CRM.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <i class="fas fa-users-cog"></i>
+                    Mini CRM
+                </h1>
+                <p class="app-subtitle">Gérez vos clients et projets efficacement</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Formulaire -->
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-plus"></i>
+                    <span id="formTitle">Ajouter un Client</span>
+                </h2>
+                <form id="clientForm">
+                    <input type="hidden" id="clientId">
+                    
+                    <div class="form-group">
+                        <label for="clientName" class="form-label">
+                            <i class="fas fa-signature"></i>
+                            Nom du client *
+                        </label>
+                        <input type="text" id="clientName" class="form-input" required placeholder="Entrez le nom du client">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientEmail" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Adresse email *
+                        </label>
+                        <input type="email" id="clientEmail" class="form-input" required placeholder="client@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientPhone" class="form-label">
+                            <i class="fas fa-phone"></i>
+                            Téléphone
+                        </label>
+                        <input type="tel" id="clientPhone" class="form-input" placeholder="+33 1 23 45 67 89">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientStatus" class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Statut
+                        </label>
+                        <select id="clientStatus" class="form-input">
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="lead">Lead</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i>
+                            Enregistrer
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">
+                            <i class="fas fa-times"></i>
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Statistiques -->
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Statistiques
+                </h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                    <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="totalClients">0</div>
+                        <div style="font-size: 0.9rem;">Clients total</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #7209b7, #5a08a1); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold;" id="activeClients">0</div>
+                        <div style="font-size: 0.9rem;">Clients actifs</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 10px;">Répartition par statut</div>
+                    <div id="statusChart" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div style="text-align: center;">
+                            <div class="status-badge status-active" style="margin: 0 auto 5px auto;">Actif</div>
+                            <div style="font-weight: bold;" id="activeCount">0</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="status-badge status-inactive" style="margin: 0 auto 5px auto;">Inactif</div>
+                            <div style="font-weight: bold;" id="inactiveCount">0</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="status-badge status-lead" style="margin: 0 auto 5px auto;">Lead</div>
+                            <div style="font-weight: bold;" id="leadCount">0</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtres -->
+            <section class="filters-section">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label for="searchInput" class="form-label">
+                            <i class="fas fa-search"></i>
+                            Rechercher un client
+                        </label>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Nom, email ou téléphone...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="statusFilter" class="form-label">
+                            <i class="fas fa-filter"></i>
+                            Filtrer par statut
+                        </label>
+                        <select id="statusFilter" class="form-input">
+                            <option value="">Tous les statuts</option>
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="lead">Lead</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button id="exportBtn" class="btn btn-success">
+                            <i class="fas fa-download"></i>
+                            Exporter CSV
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Liste des clients -->
+            <section class="clients-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-list"></i>
+                        Liste des Clients
+                    </h2>
+                    <div class="clients-count">
+                        <span id="clientsCount">0</span> clients
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div id="clientsContainer">
+                        <!-- État vide -->
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Aucun client trouvé</h3>
+                            <p>Commencez par ajouter votre premier client en utilisant le formulaire.</p>
+                            <button class="btn btn-primary" onclick="document.getElementById('clientName').focus()">
+                                <i class="fas fa-user-plus"></i>
+                                Ajouter un client
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../assets/scripts/CRM/script_index_CRM.js"></script>
+</body>
+</html>
