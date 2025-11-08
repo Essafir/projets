@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projets du Client - Mini CRM</title>
+</head>
+<body>
+    <!-- Header avec navigation -->
+    <header>
+        <nav>
+            <a href="index.html">← Retour aux Clients</a>
+            <h1 id="clientName">Projets du Client</h1>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Section bouton d'ajout -->
+        <section class="actions">
+            <button id="addProjectBtn">+ Ajouter un Projet</button>
+        </section>
+
+        <!-- Section liste des projets -->
+        <section class="projects-list">
+            <h2>Liste des Projets</h2>
+            <div id="projectsContainer">
+                <!-- Les projets seront affichés ici dynamiquement -->
+                <p id="noProjectsMessage" style="display: none;">Aucun projet pour ce client.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal pour ajouter/modifier un projet -->
+    <div id="projectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background: white; margin: 50px auto; padding: 20px; width: 90%; max-width: 600px; border-radius: 5px;">
+            <h2 id="modalTitle">Ajouter un Projet</h2>
+            
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="projectTitle">Titre du projet *</label>
+                    <input type="text" id="projectTitle" required style="width: 100%; padding: 8px; margin-top: 5px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="projectDescription">Description</label>
+                    <textarea id="projectDescription" style="width: 100%; padding: 8px; margin-top: 5px; height: 100px;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="projectStatus">Statut</label>
+                    <select id="projectStatus" style="width: 100%; padding: 8px; margin-top: 5px;">
+                        <option value="en_cours">En cours</option>
+                        <option value="terminé">Terminé</option>
+                        <option value="en_retard">En retard</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="projectDueDate">Date d'échéance</label>
+                    <input type="date" id="projectDueDate" style="width: 100%; padding: 8px; margin-top: 5px;">
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" id="cancelBtn">Annuler</button>
+                    <button type="submit" id="submitBtn">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Constantes et variables globales
+        const PROJECTS_KEY = 'crm_projects';
+        let projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || '[]');
+        let currentClientId = null;
+
+        // Éléments DOM
+        const clientNameElement = document.getElementById('clientName');
+        const projectsContainer = document.getElementById('projectsContainer');
+        const noProjectsMessage = document.getElementById('noProjectsMessage');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const projectModal = document.getElementById('projectModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const projectForm = document.getElementById('projectForm');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer l'ID du client depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentClientId = urlParams.get('clientId');
+            
+            if (!currentClientId) {
+                alert('Client non spécifié');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Charger les informations du client et ses projets
+            loadClientData();
+            loadProjects();
+        });
+
+        // Charger les données du client
+        function loadClientData() {
+            const clients = JSON.parse(localStorage.getItem('crm_clients') || '[]');
+            const client = clients.find(c => c.id === currentClientId);
+            
+            if (client) {
+                clientNameElement.textContent = `Projets de ${client.name}`;
+            } else {
+                alert('Client non trouvé');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Charger et afficher les projets
+        function loadProjects() {
+            const clientProjects = projects.filter(p => p.clientId === currentClientId);
+            
+            if (clientProjects.length === 0) {
+                noProjectsMessage.style.display = 'block';
+                projectsContainer.innerHTML = '';
+                return;
+            }
+
+            noProjectsMessage.style.display = 'none';
+            
+            // Créer le tableau des projets
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            
+            // En-tête du tableau
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Titre</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Statut</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Échéance</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Actions</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            // Corps du tableau
+            const tbody = document.createElement('tbody');
+            
+            clientProjects.forEach(project => {
+                const row = document.createElement('tr');
+                
+                // Déterminer la couleur du statut
+                let statusColor = '#666';
+                if (project.status === 'en_cours') statusColor = '#007bff';
+                if (project.status === 'terminé') statusColor = '#28a745';
+                if (project.status === 'en_retard') statusColor = '#dc3545';
+                
+                row.innerHTML = `
+                    <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(project.title)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; color: ${statusColor};">${getStatusText(project.status)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${project.dueDate ? formatDate(project.dueDate) : 'Non définie'}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        <button onclick="editProject('${project.id}')" style="margin-right: 5px;">Modifier</button>
+                        <button onclick="deleteProject('${project.id}')" style="background: #dc3545; color: white;">Supprimer</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            projectsContainer.innerHTML = '';
+            projectsContainer.appendChild(table);
+        }
+
+        // Ouvrir le modal pour ajouter un projet
+        addProjectBtn.addEventListener('click', function() {
+            modalTitle.textContent = 'Ajouter un Projet';
+            projectForm.reset();
+            document.getElementById('projectId').value = '';
+            projectModal.style.display = 'block';
+        });
+
+        // Annuler l'édition/ajout
+        cancelBtn.addEventListener('click', function() {
+            projectModal.style.display = 'none';
+        });
+
+        // Soumission du formulaire
+        projectForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const projectId = document.getElementById('projectId').value;
+            const title = document.getElementById('projectTitle').value.trim();
+            const description = document.getElementById('projectDescription').value.trim();
+            const status = document.getElementById('projectStatus').value;
+            const dueDate = document.getElementById('projectDueDate').value;
+            
+            if (!title) {
+                alert('Le titre est obligatoire');
+                return;
+            }
+            
+            if (projectId) {
+                // Modification d'un projet existant
+                updateProject(projectId, { title, description, status, dueDate });
+            } else {
+                // Ajout d'un nouveau projet
+                addProject({ title, description, status, dueDate });
+            }
+            
+            // Fermer le modal
+            projectModal.style.display = 'none';
+        });
+
+        // Ajouter un projet
+        function addProject(projectData) {
+            const newProject = {
+                id: generateId(),
+                clientId: currentClientId,
+                title: projectData.title,
+                description: projectData.description,
+                status: projectData.status,
+                dueDate: projectData.dueDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            projects.push(newProject);
+            saveProjects();
+            loadProjects();
+        }
+
+        // Modifier un projet
+        function updateProject(projectId, projectData) {
+            const projectIndex = projects.findIndex(p => p.id === projectId);
+            
+            if (projectIndex !== -1) {
+                projects[projectIndex] = {
+                    ...projects[projectIndex],
+                    ...projectData,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                saveProjects();
+                loadProjects();
+            }
+        }
+
+        // Éditer un projet
+        function editProject(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            
+            if (project) {
+                modalTitle.textContent = 'Modifier le Projet';
+                document.getElementById('projectId').value = project.id;
+                document.getElementById('projectTitle').value = project.title;
+                document.getElementById('projectDescription').value = project.description || '';
+                document.getElementById('projectStatus').value = project.status;
+                document.getElementById('projectDueDate').value = project.dueDate || '';
+                
+                projectModal.style.display = 'block';
+            }
+        }
+
+        // Supprimer un projet
+        function deleteProject(projectId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+                projects = projects.filter(p => p.id !== projectId);
+                saveProjects();
+                loadProjects();
+            }
+        }
+
+        // Sauvegarder les projets dans le localStorage
+        function saveProjects() {
+            localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+        }
+
+        // Fonctions utilitaires
+        function generateId() {
+            return 'project_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'en_cours': 'En cours',
+                'terminé': 'Terminé',
+                'en_retard': 'En retard'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
+    </script>
+</body>
+</html>
