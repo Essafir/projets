@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Mini CRM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--dark);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .account-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .account-card {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .account-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .account-card.selected {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .account-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .account-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .free .account-icon { background: var(--primary); }
+        .premium .account-icon { background: var(--secondary); }
+
+        .account-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .account-details {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .account-limit {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .free .account-limit { color: var(--primary); }
+        .premium .account-limit { color: var(--secondary); }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-users-cog"></i>
+        </div>
+        <h1>Connexion au CRM</h1>
+
+        <div id="alertMessage" class="alert alert-error"></div>
+
+        <div class="account-cards">
+            <!-- Compte Free -->
+            <div class="account-card free selected" data-account="free">
+                <div class="account-header">
+                    <div class="account-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="account-name">Compte Gratuit</div>
+                        <div class="account-details">Pour les petits projets</div>
+                    </div>
+                </div>
+                <div class="account-limit">✓ 10 clients maximum</div>
+            </div>
+
+            <!-- Compte Premium -->
+            <div class="account-card premium" data-account="premium">
+                <div class="account-header">
+                    <div class="account-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div>
+                        <div class="account-name">Compte Premium</div>
+                        <div class="account-details">Pour les professionnels</div>
+                    </div>
+                </div>
+                <div class="account-limit">✓ Clients illimités</div>
+            </div>
+        </div>
+
+        <button id="loginBtn" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i>
+            Se connecter avec le compte gratuit
+        </button>
+    </div>
+
+    <script>
+        // Comptes pré-créés
+        const PREDEFINED_ACCOUNTS = {
+            free: {
+                id: 'user_free_001',
+                username: 'compte_gratuit',
+                type: 'free',
+                clientLimit: 10,
+                createdAt: new Date().toISOString()
+            },
+            premium: {
+                id: 'user_premium_001', 
+                username: 'compte_premium',
+                type: 'premium',
+                clientLimit: null, // illimité
+                createdAt: new Date().toISOString()
+            }
+        };
+
+        let selectedAccount = 'free';
+
+        // Gestion de la sélection du compte
+        document.querySelectorAll('.account-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Retirer la sélection précédente
+                document.querySelectorAll('.account-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // Ajouter la sélection
+                this.classList.add('selected');
+                
+                // Mettre à jour le compte sélectionné
+                selectedAccount = this.dataset.account;
+                
+                // Mettre à jour le texte du bouton
+                const buttonText = selectedAccount === 'free' ? 
+                    'Se connecter avec le compte gratuit' : 
+                    'Se connecter avec le compte premium';
+                document.getElementById('loginBtn').innerHTML = `
+                    <i class="fas fa-sign-in-alt"></i>
+                    ${buttonText}
+                `;
+            });
+        });
+
+        // Gestion de la connexion
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            // Récupérer le compte sélectionné
+            const user = PREDEFINED_ACCOUNTS[selectedAccount];
+            
+            // Sauvegarder l'utilisateur connecté
+            localStorage.setItem('crm_current_user', JSON.stringify(user));
+            
+            // Rediriger vers le CRM
+            window.location.href = 'index.html';
+        });
+
+        function showAlert(message) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
