@@ -2,21 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prix des Cryptomonnaies</title>
+    <title>Cryptos Top 10</title>
 </head>
 <body>
-    <h1>📊 Cours des Cryptomonnaies</h1>
+    <h1>Cryptomonnaies Top 10</h1>
     
-    <button onclick="chargerTopCryptos()">Top 10 Cryptos</button>
-    <button onclick="chargerBitcoin()">Détails Bitcoin</button>
-    <button onclick="chargerEthereum()">Détails Ethereum</button>
-    <button onclick="chargerTrending()">Cryptos Tendances</button>
+    <input type="text" id="recherche" placeholder="Rechercher une crypto (ex: bitcoin)">
+    <button onclick="rechercherCrypto()">Rechercher</button>
     
     <div id="resultats">
-        <p>Cliquez sur un bouton pour charger les données crypto...</p>
+        <p>Chargement...</p>
     </div>
 
-    <script src="script .js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
