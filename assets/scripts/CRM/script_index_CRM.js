@@ -449,8 +449,3 @@ function showAlert(message, type) {
     setTimeout(() => alert.remove(), 3000);
 }
 
-// Exposer les fonctions globales
-window.viewProjects = viewProjects;
-window.editClient = editClient;
-window.deleteClient = deleteClient;
-window.clearFilters = clearFilters;
