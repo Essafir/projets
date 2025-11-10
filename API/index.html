@@ -1,19 +1,14 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Cryptos Top 10</title>
+    <title>Crypto Recherche</title>
 </head>
 <body>
-    <h1>Cryptomonnaies Top 10</h1>
-    
-    <input type="text" id="recherche" placeholder="Rechercher une crypto (ex: bitcoin)">
-    <button onclick="rechercherCrypto()">Rechercher</button>
-    
-    <div id="resultats">
-        <p>Chargement...</p>
-    </div>
-
+    <h1>Recherche Crypto</h1>
+    <input type="text" id="recherche" placeholder="bitcoin, ethereum...">
+    <button onclick="chercherCrypto()">Chercher</button>
+    <div id="resultat"></div>
     <script src="script.js"></script>
 </body>
 </html>
