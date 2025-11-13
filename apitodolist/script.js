@@ -1,353 +1,399 @@
-// Éléments DOM
-const btn = document.getElementById('load');
-const statusEl = document.getElementById('status');
-const liste = document.getElementById('liste');
-const addTaskBtn = document.getElementById('add-task');
-const taskModal = document.getElementById('task-modal');
-const cancelTaskBtn = document.getElementById('cancel-task');
-const saveTaskBtn = document.getElementById('save-task');
-const newTaskInput = document.getElementById('new-task-input');
-const searchInput = document.getElementById('search');
-const filterBtns = document.querySelectorAll('.filter-btn');
-const notification = document.getElementById('notification');
+// Gestionnaire de tâches asynchrone avec bonnes pratiques
+class TaskManager {
+    constructor() {
+        this.tasks = [];
+        this.currentFilter = 'all';
+        this.searchTerm = '';
+        this.isLoading = false;
+        
+        this.initializeElements();
+        this.setupEventListeners();
+        this.showWelcomeMessage();
+    }
 
-// Statistiques
-const totalTasksEl = document.getElementById('total-tasks');
-const completedTasksEl = document.getElementById('completed-tasks');
-const progressEl = document.getElementById('progress');
+    // Initialisation des éléments DOM
+    initializeElements() {
+        this.elements = {
+            loadBtn: document.getElementById('load'),
+            statusEl: document.getElementById('status'),
+            tasksList: document.getElementById('liste'),
+            addTaskBtn: document.getElementById('add-task'),
+            taskModal: document.getElementById('task-modal'),
+            cancelTaskBtn: document.getElementById('cancel-task'),
+            cancelBtn: document.getElementById('cancel-btn'),
+            saveTaskBtn: document.getElementById('save-task'),
+            newTaskInput: document.getElementById('new-task-input'),
+            searchInput: document.getElementById('search'),
+            filterBtns: document.querySelectorAll('.filter-btn'),
+            notification: document.getElementById('notification'),
+            totalTasksEl: document.getElementById('total-tasks'),
+            completedTasksEl: document.getElementById('completed-tasks')
+        };
+    }
 
-// État de l'application
-let tasks = [];
-let currentFilter = 'all';
-let searchTerm = '';
+    // Configuration des écouteurs d'événements
+    setupEventListeners() {
+        // Chargement des tâches
+        this.elements.loadBtn.addEventListener('click', () => this.loadTasks());
+        
+        // Gestion des tâches
+        this.elements.addTaskBtn.addEventListener('click', () => this.showTaskModal());
+        this.elements.cancelTaskBtn.addEventListener('click', () => this.hideTaskModal());
+        this.elements.cancelBtn.addEventListener('click', () => this.hideTaskModal());
+        this.elements.saveTaskBtn.addEventListener('click', () => this.handleAddTask());
+        this.elements.newTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleAddTask();
+        });
+        
+        // Filtrage et recherche
+        this.elements.filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleFilterChange(e.target.dataset.filter));
+        });
+        this.elements.searchInput.addEventListener('input', (e) => {
+            this.searchTerm = e.target.value.toLowerCase();
+            this.debounce(() => this.renderTasks(), 300)();
+        });
+        
+        // Fermeture modale
+        this.elements.taskModal.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-backdrop')) this.hideTaskModal();
+        });
+    }
 
-// Initialisation
-document.addEventListener('DOMContentLoaded', () => {
-    loadTasks(); // Chargement automatique
-    setupEventListeners();
-});
+    // Debounce pour la recherche
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
-// Configuration des événements
-function setupEventListeners() {
-    // Bouton de chargement
-    btn.addEventListener('click', loadTasks);
-    
-    // Gestion des tâches
-    addTaskBtn.addEventListener('click', showAddTaskModal);
-    cancelTaskBtn.addEventListener('click', hideAddTaskModal);
-    saveTaskBtn.addEventListener('click', addNewTask);
-    newTaskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addNewTask();
-    });
-    
-    // Filtres et recherche
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => setFilter(btn.dataset.filter));
-    });
-    searchInput.addEventListener('input', (e) => {
-        searchTerm = e.target.value.toLowerCase();
-        renderTasks();
-    });
-    
-    // Fermer la modal en cliquant à l'extérieur
-    taskModal.addEventListener('click', (e) => {
-        if (e.target === taskModal) hideAddTaskModal();
-    });
-}
-
-// Chargement des tâches depuis l'API
-async function loadTasks() {
-    setLoadingState(true);
-    
-    try {
-        statusEl.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <div class="loading-spinner"></div>
-                <span>Chargement de vos tâches...</span>
+    // Message de bienvenue
+    showWelcomeMessage() {
+        this.elements.statusEl.innerHTML = `
+            <div class="welcome-message">
+                <h3>Bienvenue dans TaskFlow</h3>
+                <p>Cliquez sur "Charger les tâches" pour commencer</p>
             </div>
         `;
+    }
+
+    // Chargement asynchrone des tâches avec gestion d'erreur
+    async loadTasks() {
+        if (this.isLoading) return;
         
+        this.setLoadingState(true);
+        
+        try {
+            await this.showLoadingState('Chargement des tâches...');
+            
+            // Simulation de délai réseau
+            await this.delay(1000);
+            
+            const data = await this.fetchTasksFromAPI();
+            this.tasks = data.slice(0, 10).map(task => this.transformTaskData(task));
+            
+            await this.showSuccessState(`${this.tasks.length} tâches chargées avec succès`);
+            this.renderTasks();
+            this.updateStatistics();
+            
+        } catch (error) {
+            await this.handleError(error);
+        } finally {
+            this.setLoadingState(false);
+        }
+    }
+
+    // Récupération des tâches depuis l'API
+    async fetchTasksFromAPI() {
         const response = await fetch('https://jsonplaceholder.typicode.com/todos');
         
-        if (!response.ok) throw new Error('Erreur réseau !');
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
         
-        const data = await response.json();
-        tasks = data.slice(0, 10).map(task => ({
+        return await response.json();
+    }
+
+    // Transformation des données de tâche
+    transformTaskData(task) {
+        return {
             ...task,
-            id: task.id,
-            title: task.title,
-            completed: task.completed,
-            createdAt: new Date()
-        }));
-        
-        showNotification('🎉 Tâches chargées avec succès !', 'success');
-        statusEl.textContent = `✅ ${tasks.length} tâches chargées - Prêt à être productif !`;
-        
-        renderTasks();
-        updateStats();
-        
-    } catch (erreur) {
-        console.error('Erreur:', erreur);
-        statusEl.innerHTML = `
-            <div style="color: var(--error);">
-                ❌ Échec du chargement : ${erreur.message}
-            </div>
-        `;
-        showNotification('⚠️ Impossible de charger les tâches', 'error');
-    } finally {
-        setLoadingState(false);
+            createdAt: new Date(),
+            localId: `local_${Date.now()}_${task.id}`
+        };
     }
-}
 
-// Ajout d'une nouvelle tâche
-function addNewTask() {
-    const title = newTaskInput.value.trim();
-    
-    if (!title) {
-        showNotification('📝 Veuillez saisir une tâche', 'warning');
-        return;
-    }
-    
-    const newTask = {
-        id: Date.now(), // ID unique
-        title: title,
-        completed: false,
-        createdAt: new Date(),
-        userId: 1
-    };
-    
-    tasks.unshift(newTask); // Ajouter au début
-    hideAddTaskModal();
-    renderTasks();
-    updateStats();
-    
-    showNotification('✅ Tâche ajoutée avec succès !', 'success');
-    newTaskInput.value = '';
-    
-    // Animation de confettis pour la première tâche
-    if (tasks.length === 1) {
-        createConfetti();
-    }
-}
-
-// Basculer l'état d'une tâche
-function toggleTask(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-        task.completed = !task.completed;
-        renderTasks();
-        updateStats();
+    // Gestion de l'ajout de tâche
+    async handleAddTask() {
+        const title = this.elements.newTaskInput.value.trim();
         
-        if (task.completed) {
-            showNotification('🎯 Tâche accomplie !', 'success');
-            // Confettis quand toutes les tâches sont terminées
-            if (tasks.every(t => t.completed)) {
-                createConfetti();
-                showNotification('🏆 Félicitations ! Toutes les tâches sont terminées !', 'success');
-            }
+        if (!title) {
+            this.showNotification('Veuillez saisir une description pour la tâche', 'warning');
+            return;
+        }
+
+        try {
+            const newTask = await this.createNewTask(title);
+            this.tasks.unshift(newTask);
+            this.hideTaskModal();
+            this.renderTasks();
+            this.updateStatistics();
+            
+            this.showNotification('Tâche ajoutée avec succès', 'success');
+            this.elements.newTaskInput.value = '';
+            
+        } catch (error) {
+            this.showNotification('Erreur lors de la création de la tâche', 'error');
         }
     }
-}
 
-// Supprimer une tâche
-function deleteTask(taskId) {
-    tasks = tasks.filter(t => t.id !== taskId);
-    renderTasks();
-    updateStats();
-    showNotification('🗑️ Tâche supprimée', 'warning');
-}
-
-// Filtrer les tâches
-function setFilter(filter) {
-    currentFilter = filter;
-    
-    // Mettre à jour les boutons de filtre
-    filterBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === filter);
-    });
-    
-    renderTasks();
-}
-
-// Rendu des tâches
-function renderTasks() {
-    let filteredTasks = tasks;
-    
-    // Appliquer le filtre
-    if (currentFilter === 'completed') {
-        filteredTasks = tasks.filter(t => t.completed);
-    } else if (currentFilter === 'pending') {
-        filteredTasks = tasks.filter(t => !t.completed);
+    // Création d'une nouvelle tâche
+    async createNewTask(title) {
+        // Simulation d'une opération asynchrone
+        await this.delay(200);
+        
+        return {
+            id: Date.now(),
+            title: title,
+            completed: false,
+            createdAt: new Date(),
+            userId: 1,
+            localId: `local_${Date.now()}`
+        };
     }
-    
-    // Appliquer la recherche
-    if (searchTerm) {
-        filteredTasks = filteredTasks.filter(t => 
-            t.title.toLowerCase().includes(searchTerm)
-        );
+
+    // Basculer l'état d'une tâche
+    async toggleTask(taskId) {
+        const task = this.tasks.find(t => t.localId === taskId);
+        if (!task) return;
+
+        try {
+            // Simulation d'une opération asynchrone
+            await this.delay(300);
+            
+            task.completed = !task.completed;
+            this.renderTasks();
+            this.updateStatistics();
+            
+            const message = task.completed ? 'Tâche marquée comme terminée' : 'Tâche remise en cours';
+            this.showNotification(message, 'success');
+            
+        } catch (error) {
+            this.showNotification('Erreur lors de la modification', 'error');
+        }
     }
-    
-    // Vider la liste
-    liste.innerHTML = '';
-    
+
+    // Supprimer une tâche
+    async deleteTask(taskId) {
+        try {
+            // Simulation d'une opération asynchrone
+            await this.delay(300);
+            
+            this.tasks = this.tasks.filter(t => t.localId !== taskId);
+            this.renderTasks();
+            this.updateStatistics();
+            
+            this.showNotification('Tâche supprimée', 'warning');
+            
+        } catch (error) {
+            this.showNotification('Erreur lors de la suppression', 'error');
+        }
+    }
+
+    // Filtrage des tâches
+    handleFilterChange(filter) {
+        this.currentFilter = filter;
+        
+        // Mise à jour des boutons de filtre
+        this.elements.filterBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        
+        this.renderTasks();
+    }
+
+    // Rendu des tâches
+    renderTasks() {
+        const filteredTasks = this.getFilteredTasks();
+        this.elements.tasksList.innerHTML = '';
+
+        if (filteredTasks.length === 0) {
+            this.renderEmptyState();
+            return;
+        }
+
+        filteredTasks.forEach(task => {
+            const taskElement = this.createTaskElement(task);
+            this.elements.tasksList.appendChild(taskElement);
+        });
+    }
+
+    // Obtention des tâches filtrées
+    getFilteredTasks() {
+        let filtered = this.tasks;
+
+        // Application du filtre
+        if (this.currentFilter === 'completed') {
+            filtered = filtered.filter(t => t.completed);
+        } else if (this.currentFilter === 'pending') {
+            filtered = filtered.filter(t => !t.completed);
+        }
+
+        // Application de la recherche
+        if (this.searchTerm) {
+            filtered = filtered.filter(t => 
+                t.title.toLowerCase().includes(this.searchTerm)
+            );
+        }
+
+        return filtered;
+    }
+
     // État vide
-    if (filteredTasks.length === 0) {
-        const emptyState = document.createElement('div');
-        emptyState.className = 'empty-state';
-        emptyState.innerHTML = `
-            <div class="icon">📝</div>
-            <h3>Aucune tâche trouvée</h3>
-            <p>${tasks.length === 0 ? 'Cliquez sur "Charger les tâches" pour commencer' : 'Aucune tâche ne correspond à votre recherche'}</p>
-        `;
-        liste.appendChild(emptyState);
-        return;
-    }
-    
-    // Ajouter les tâches filtrées
-    filteredTasks.forEach(task => {
-        const taskItem = createTaskElement(task);
-        liste.appendChild(taskItem);
-    });
-}
+    renderEmptyState() {
+        let message, icon;
+        
+        if (this.tasks.length === 0) {
+            message = 'Aucune tâche chargée';
+            icon = '📋';
+        } else if (this.searchTerm) {
+            message = 'Aucune tâche ne correspond à votre recherche';
+            icon = '🔍';
+        } else {
+            message = 'Aucune tâche dans cette catégorie';
+            icon = '📁';
+        }
 
-// Créer un élément tâche
-function createTaskElement(task) {
-    const li = document.createElement('li');
-    li.className = `task-item ${task.completed ? 'completed' : ''}`;
-    li.innerHTML = `
-        <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
-             onclick="toggleTask(${task.id})">
-            ${task.completed ? '✓' : ''}
-        </div>
-        <div class="task-content">
-            <div class="task-title">${task.title}</div>
-            <div class="task-meta">
-                Créé le ${task.createdAt.toLocaleDateString()}
+        this.elements.tasksList.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">${icon}</div>
+                <h3>${message}</h3>
+                ${this.tasks.length === 0 ? '<p>Utilisez le bouton "Charger les tâches" pour commencer</p>' : ''}
             </div>
-        </div>
-        <div class="task-actions">
-            <button class="task-action-btn" onclick="deleteTask(${task.id})" title="Supprimer">
+        `;
+    }
+
+    // Création d'un élément tâche
+    createTaskElement(task) {
+        const li = document.createElement('li');
+        li.className = `task-item ${task.completed ? 'completed' : ''}`;
+        li.innerHTML = `
+            <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
+                 onclick="taskManager.toggleTask('${task.localId}')">
+                ${task.completed ? '✓' : ''}
+            </div>
+            <div class="task-content">
+                <div class="task-title">${this.escapeHtml(task.title)}</div>
+                <div class="task-meta">
+                    Créé le ${task.createdAt.toLocaleDateString('fr-FR')}
+                </div>
+            </div>
+            <button class="btn btn-outline" onclick="taskManager.deleteTask('${task.localId}')" 
+                    title="Supprimer la tâche">
                 🗑️
             </button>
-        </div>
-    `;
-    return li;
-}
+        `;
+        return li;
+    }
 
-// Mettre à jour les statistiques
-function updateStats() {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.completed).length;
-    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
-    totalTasksEl.textContent = total;
-    completedTasksEl.textContent = completed;
-    progressEl.textContent = `${progress}%`;
-    
-    // Animation des statistiques
-    animateValue(totalTasksEl, parseInt(totalTasksEl.textContent) || 0, total, 500);
-    animateValue(completedTasksEl, parseInt(completedTasksEl.textContent) || 0, completed, 500);
-}
+    // Échappement HTML pour la sécurité
+    escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-// Animation des valeurs
-function animateValue(element, start, end, duration) {
-    const startTime = performance.now();
-    const change = end - start;
-    
-    function updateValue(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+    // Mise à jour des statistiques
+    updateStatistics() {
+        const total = this.tasks.length;
+        const completed = this.tasks.filter(t => t.completed).length;
         
-        // Easing function
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const value = Math.floor(start + change * easeOutQuart);
+        this.elements.totalTasksEl.textContent = `${total} tâche${total > 1 ? 's' : ''}`;
+        this.elements.completedTasksEl.textContent = `${completed} terminée${completed > 1 ? 's' : ''}`;
+    }
+
+    // Gestion de la modale
+    showTaskModal() {
+        this.elements.taskModal.classList.add('active');
+        this.elements.newTaskInput.focus();
+    }
+
+    hideTaskModal() {
+        this.elements.taskModal.classList.remove('active');
+        this.elements.newTaskInput.value = '';
+    }
+
+    // États de chargement
+    setLoadingState(loading) {
+        this.isLoading = loading;
+        this.elements.loadBtn.disabled = loading;
         
-        element.textContent = element === progressEl ? `${value}%` : value;
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateValue);
+        if (loading) {
+            this.elements.loadBtn.innerHTML = '<span class="btn-icon"><div class="loading-spinner"></div></span>Chargement...';
+        } else {
+            this.elements.loadBtn.innerHTML = '<span class="btn-icon">⏳</span>Charger les tâches';
         }
     }
-    
-    requestAnimationFrame(updateValue);
-}
 
-// Gestion de la modal
-function showAddTaskModal() {
-    taskModal.classList.add('active');
-    newTaskInput.focus();
-}
-
-function hideAddTaskModal() {
-    taskModal.classList.remove('active');
-    newTaskInput.value = '';
-}
-
-// États de chargement
-function setLoadingState(loading) {
-    btn.disabled = loading;
-    if (loading) {
-        btn.innerHTML = '<span class="btn-icon">⏳</span>Chargement...';
-        btn.classList.add('loading');
-    } else {
-        btn.innerHTML = '<span class="btn-icon">🚀</span>Charger les tâches';
-        btn.classList.remove('loading');
+    async showLoadingState(message) {
+        this.elements.statusEl.innerHTML = `
+            <div class="status-loading">
+                <div class="loading-spinner"></div>
+                <span>${message}</span>
+            </div>
+        `;
     }
-}
 
-// Notifications
-function showNotification(message, type = 'success') {
-    notification.textContent = message;
-    notification.className = `notification ${type} show`;
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-}
+    async showSuccessState(message) {
+        this.elements.statusEl.innerHTML = `
+            <div class="status-success">
+                <span>✅</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
 
-// Confettis de célébration
-function createConfetti() {
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-    
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        document.body.appendChild(confetti);
+    // Gestion des erreurs
+    async handleError(error) {
+        console.error('Erreur:', error);
+        
+        this.elements.statusEl.innerHTML = `
+            <div class="status-error">
+                <span>❌</span>
+                <span>Erreur: ${error.message}</span>
+            </div>
+        `;
+        
+        this.showNotification('Erreur lors du chargement des tâches', 'error');
+    }
+
+    // Notification
+    showNotification(message, type = 'success') {
+        this.elements.notification.textContent = message;
+        this.elements.notification.className = `notification ${type} show`;
         
         setTimeout(() => {
-            confetti.remove();
-        }, 5000);
+            this.elements.notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // Utilitaire de délai
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
-// Style pour le spinner de chargement
-const style = document.createElement('style');
-style.textContent = `
-    .loading-spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid #f3f3f3;
-        border-top: 2px solid var(--primary);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .btn-primary.loading {
-        animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
-    }
-`;
-document.head.appendChild(style);
+// Initialisation de l'application
+const taskManager = new TaskManager();
+
+// Export pour l'utilisation globale (pour les onclick dans le HTML)
+window.taskManager = taskManager;

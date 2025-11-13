@@ -3,71 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskMaster - Gestionnaire Motivant</title>
+    <title>TaskFlow - Gestionnaire de Tâches</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header avec statistiques -->
-        <header class="header">
-            <h1>🎯 TaskMaster</h1>
-            <p>Votre compagnon de productivité</p>
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="total-tasks">0</span>
-                    <span class="stat-label">Tâches totales</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="completed-tasks">0</span>
-                    <span class="stat-label">Terminées</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="progress">0%</span>
-                    <span class="stat-label">Progression</span>
-                </div>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="app-icon">📋</span>
+                    TaskFlow
+                </h1>
+                <p class="app-subtitle">Gestionnaire de tâches asynchrone</p>
             </div>
         </header>
 
-        <!-- Contrôles -->
-        <div class="controls">
-            <button id="load" class="btn-primary">
-                <span class="btn-icon">🚀</span>
-                Charger les tâches
-            </button>
-            <button id="add-task" class="btn-secondary">
-                <span class="btn-icon">➕</span>
-                Ajouter une tâche
-            </button>
-        </div>
+        <main class="app-main">
+            <!-- Section de contrôle -->
+            <section class="control-section">
+                <div class="button-group">
+                    <button id="load" class="btn btn-primary">
+                        <span class="btn-icon">⏳</span>
+                        Charger les tâches
+                    </button>
+                    <button id="add-task" class="btn btn-secondary">
+                        <span class="btn-icon">+</span>
+                        Nouvelle tâche
+                    </button>
+                </div>
 
-        <!-- Filtres -->
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">Toutes</button>
-            <button class="filter-btn" data-filter="completed">Terminées ✓</button>
-            <button class="filter-btn" data-filter="pending">En cours 🔄</button>
-        </div>
+                <div class="filter-group">
+                    <div class="search-box">
+                        <input type="text" id="search" placeholder="Rechercher une tâche..." class="search-input">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">Toutes</button>
+                        <button class="filter-btn" data-filter="pending">En cours</button>
+                        <button class="filter-btn" data-filter="completed">Terminées</button>
+                    </div>
+                </div>
+            </section>
 
-        <!-- Barre de recherche -->
-        <div class="search-container">
-            <input type="text" id="search" placeholder="🔍 Rechercher une tâche..." class="search-input">
-        </div>
+            <!-- Indicateur de statut -->
+            <div id="status" class="status-container">
+                <div class="welcome-message">
+                    <h3>Bienvenue dans TaskFlow</h3>
+                    <p>Cliquez sur "Charger les tâches" pour commencer</p>
+                </div>
+            </div>
 
-        <!-- Zone de statut -->
-        <div id="status" class="status-message"></div>
+            <!-- Liste des tâches -->
+            <section class="tasks-section">
+                <div class="tasks-header">
+                    <h2>Mes Tâches</h2>
+                    <div class="tasks-stats">
+                        <span class="stat" id="total-tasks">0 tâches</span>
+                        <span class="stat" id="completed-tasks">0 terminées</span>
+                    </div>
+                </div>
 
-        <!-- Liste des tâches -->
-        <div class="tasks-container">
-            <ul id="liste" class="tasks-list"></ul>
-        </div>
+                <ul id="liste" class="tasks-list">
+                    <!-- Les tâches seront injectées ici -->
+                </ul>
+            </section>
+        </main>
 
-        <!-- Modal d'ajout de tâche -->
+        <!-- Modal pour nouvelle tâche -->
         <div id="task-modal" class="modal">
+            <div class="modal-backdrop"></div>
             <div class="modal-content">
-                <h3>➕ Nouvelle Tâche</h3>
-                <input type="text" id="new-task-input" placeholder="Quelle est votre prochaine tâche ?" class="modal-input">
-                <div class="modal-actions">
-                    <button id="cancel-task" class="btn-secondary">Annuler</button>
-                    <button id="save-task" class="btn-primary">Créer la tâche</button>
+                <div class="modal-header">
+                    <h3>Créer une nouvelle tâche</h3>
+                    <button class="modal-close" id="cancel-task">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="new-task-input" placeholder="Description de la tâche..." class="task-input">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancel-btn">Annuler</button>
+                    <button class="btn btn-primary" id="save-task">Enregistrer</button>
                 </div>
             </div>
         </div>
