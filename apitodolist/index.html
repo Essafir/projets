@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster - Gestionnaire Motivant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header avec statistiques -->
+        <header class="header">
+            <h1>🎯 TaskMaster</h1>
+            <p>Votre compagnon de productivité</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="total-tasks">0</span>
+                    <span class="stat-label">Tâches totales</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="completed-tasks">0</span>
+                    <span class="stat-label">Terminées</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="progress">0%</span>
+                    <span class="stat-label">Progression</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contrôles -->
+        <div class="controls">
+            <button id="load" class="btn-primary">
+                <span class="btn-icon">🚀</span>
+                Charger les tâches
+            </button>
+            <button id="add-task" class="btn-secondary">
+                <span class="btn-icon">➕</span>
+                Ajouter une tâche
+            </button>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Toutes</button>
+            <button class="filter-btn" data-filter="completed">Terminées ✓</button>
+            <button class="filter-btn" data-filter="pending">En cours 🔄</button>
+        </div>
+
+        <!-- Barre de recherche -->
+        <div class="search-container">
+            <input type="text" id="search" placeholder="🔍 Rechercher une tâche..." class="search-input">
+        </div>
+
+        <!-- Zone de statut -->
+        <div id="status" class="status-message"></div>
+
+        <!-- Liste des tâches -->
+        <div class="tasks-container">
+            <ul id="liste" class="tasks-list"></ul>
+        </div>
+
+        <!-- Modal d'ajout de tâche -->
+        <div id="task-modal" class="modal">
+            <div class="modal-content">
+                <h3>➕ Nouvelle Tâche</h3>
+                <input type="text" id="new-task-input" placeholder="Quelle est votre prochaine tâche ?" class="modal-input">
+                <div class="modal-actions">
+                    <button id="cancel-task" class="btn-secondary">Annuler</button>
+                    <button id="save-task" class="btn-primary">Créer la tâche</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
