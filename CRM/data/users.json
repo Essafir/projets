@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123",
+      "accountType": "premium",
+      "firstName": "Administrateur",
+      "lastName": "Système"
+    },
+    {
+      "id": 2,
+      "username": "user1",
+      "password": "pass123",
+      "accountType": "free",
+      "firstName": "Jean",
+      "lastName": "Dupont"
+    },
+    {
+      "id": 3,
+      "username": "premium",
+      "password": "premium123",
+      "accountType": "premium",
+      "firstName": "Marie",
+      "lastName": "Martin"
+    },
+    {
+      "id": 4,
+      "username": "demo",
+      "password": "demo123",
+      "accountType": "free",
+      "firstName": "Pierre",
+      "lastName": "Leroy"
+    }
+  ]
+}

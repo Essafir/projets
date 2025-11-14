@@ -1,309 +1,310 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini CRM - Gestion des Clients</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="../assets/styles/CRM/style_index_CRM.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="./styles/style_index_CRM.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
     <div class="app-container">
-      <!-- Header -->
-      <header class="app-header">
-        <div class="header-content">
-          <h1 class="app-title">
-            <i class="fas fa-users-cog"></i>
-            Mini CRM
-          </h1>
-          <p class="app-subtitle">Gérez vos clients et projets efficacement</p>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <!-- <div style="grid-column: 1 / -1;">
-                <button id="addClientBtn" class="btn btn-primary" style="margin-bottom: 20px;">
-                    <i class="fas fa-user-plus"></i>
-                    Ajouter un Client
-                </button>
-            </div> -->
-
-        <!-- Statistiques -->
-        <section class="form-section">
-          <h2 class="section-title">
-            <i class="fas fa-chart-bar"></i>
-            Statistiques
-          </h2>
-          <div
-            style="
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15px;
-              margin-top: 20px;
-            "
-          >
-            <div
-              style="
-                background: linear-gradient(135deg, #4361ee, #3a56d4);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-              "
-            >
-              <div style="font-size: 2rem; font-weight: bold" id="totalClients">
-                0
-              </div>
-              <div style="font-size: 0.9rem">Clients total</div>
-            </div>
-            <div
-              style="
-                background: linear-gradient(135deg, #7209b7, #5a08a1);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-              "
-            >
-              <div
-                style="font-size: 2rem; font-weight: bold"
-                id="activeClients"
-              >
-                0
-              </div>
-              <div style="font-size: 0.9rem">Clients actifs</div>
-            </div>
-          </div>
-          <div
-            style="
-              margin-top: 20px;
-              padding: 15px;
-              background: #f8f9fa;
-              border-radius: 10px;
-            "
-          >
-            <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 10px">
-              Répartition par statut
-            </div>
-            <div
-              id="statusChart"
-              style="
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 10px;
-              "
-            >
-              <div style="text-align: center">
-                <div
-                  class="status-badge status-active"
-                  style="margin: 0 auto 5px auto"
-                >
-                  Actif
+        <!-- Header Professionnel -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-main">
+                    <div class="brand-section">
+                        <div class="logo">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <div class="brand-info">
+                            <h1 class="app-title">Mini CRM</h1>
+                            <p class="app-subtitle">Gestion Professionnelle des Clients</p>
+                        </div>
+                    </div>
+                    
+                    <div class="user-section">
+                        <div class="user-profile">
+                            <div class="user-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name" id="userName">Chargement...</span>
+                                <span class="user-role" id="userRole">Compte Gratuit</span>
+                            </div>
+                        </div>
+                        <button id="logoutBtn" class="btn-logout" title="Déconnexion">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div style="font-weight: bold" id="activeCount">0</div>
-              </div>
-              <div style="text-align: center">
-                <div
-                  class="status-badge status-inactive"
-                  style="margin: 0 auto 5px auto"
-                >
-                  Inactif
+            </div>
+        </header>
+
+        <!-- Contenu Principal -->
+        <main class="main-content">
+            <!-- Section Tableau de Bord -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Tableau de Bord
+                    </h2>
+                    <div class="last-update" id="lastUpdate"></div>
                 </div>
-                <div style="font-weight: bold" id="inactiveCount">0</div>
-              </div>
-              <div style="text-align: center">
-                <div
-                  class="status-badge status-lead"
-                  style="margin: 0 auto 5px auto"
-                >
-                  Lead
+
+                <!-- Cartes de Statistiques -->
+                <div class="stats-cards">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalClients">0</div>
+                            <div class="stat-label">Clients Total</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="activePercentage">0%</div>
+                            <div class="stat-label">Taux d'Activité</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="activeClients">0</div>
+                            <div class="stat-label">Clients Actifs</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="monthGrowth">+0</div>
+                            <div class="stat-label">Nouveaux ce Mois</div>
+                        </div>
+                    </div>
                 </div>
-                <div style="font-weight: bold" id="leadCount">0</div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <!-- Filtres -->
-        <section class="filters-section">
-          <h2 class="section-title">
-            <i class="fas fa-cog"></i>
-            Parametre
-          </h2>
-          <div id="limitInfo"></div>
-          <div class="filters-grid">
-            <div class="form-group">
-              <label for="searchInput" class="form-label">
-                <i class="fas fa-search"></i>
-                Rechercher un client
-              </label>
-              <input
-                type="text"
-                id="searchInput"
-                class="form-input"
-                placeholder="Nom, email ou téléphone..."
-              />
-            </div>
+                <!-- Graphiques -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Répartition par Statut</h3>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color active"></span>
+                                    <span>Actifs</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color inactive"></span>
+                                    <span>Inactifs</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color lead"></span>
+                                    <span>Leads</span>
+                                </div>
+                            </div>
+                        </div>
+                        <canvas id="statusPieChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Évolution Mensuelle</h3>
+                            <span class="chart-subtitle">Nouveaux clients par mois</span>
+                        </div>
+                        <canvas id="monthlyLineChart"></canvas>
+                    </div>
+                </div>
+            </section>
 
-            <div class="form-group">
-              <label for="statusFilter" class="form-label">
-                <i class="fas fa-filter"></i>
-                Filtrer par statut
-              </label>
-              <select id="statusFilter" class="form-input">
-                <option value="">Tous les statuts</option>
-                <option value="actif">Actif</option>
-                <option value="inactif">Inactif</option>
-                <option value="lead">Lead</option>
-              </select>
-            </div>
+            <!-- Section Gestion des Clients -->
+            <section class="clients-section">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">
+                            <i class="fas fa-address-book"></i>
+                            Gestion des Clients
+                        </h2>
+                        <div class="clients-count">
+                            <span id="clientsCount">0</span> clients
+                        </div>
+                    </div>
+                    <div id="limitInfo" class="limit-info"></div>
+                </div>
 
-            <div
-              class="form-group"
-              style="
-                grid-column: 1 / -1;
-                display: flex;
-                gap: 12px;
-                align-items: flex-end;
-              "
-            >
-              <button id="exportBtn" class="btn btn-success">
-                <i class="fas fa-download"></i>
-                Exporter CSV
-              </button>
-              <button id="addClientBtn" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i>
-                Ajouter un Client
-              </button>
-            </div>
-          </div>
-        </section>
+                <!-- Barre d'Outils -->
+                <div class="toolbar">
+                    <div class="search-group">
+                        <div class="search-input-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input
+                                type="text"
+                                id="searchInput"
+                                class="search-input"
+                                placeholder="Rechercher un client..."
+                            />
+                            <button class="clear-search" id="clearSearchBtn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="lead">Lead</option>
+                        </select>
+                        
+                        <select id="sortBy" class="filter-select">
+                            <option value="name">Trier par nom</option>
+                            <option value="date">Trier par date</option>
+                            <option value="status">Trier par statut</option>
+                        </select>
+                    </div>
+                    
+                    <div class="action-group">
+                        <button id="exportBtn" class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            Exporter
+                        </button>
+                        <button id="addClientBtn" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            Nouveau Client
+                        </button>
+                    </div>
+                </div>
 
-        <!-- Liste des clients -->
-        <section class="clients-section">
-          <div class="section-header">
-            <h2 class="section-title">
-              <i class="fas fa-list"></i>
-              Liste des Clients
-            </h2>
-            <div class="clients-count">
-              <span id="clientsCount">0</span> clients
-            </div>
-          </div>
-
-          <div class="table-container">
-            <div id="clientsContainer">
-              <!-- État vide -->
-              <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <h3>Aucun client trouvé</h3>
-                <p>
-                  Commencez par ajouter votre premier client en utilisant le
-                  formulaire.
-                </p>
-                <button
-                  class="btn btn-primary"
-                  onclick="document.getElementById('clientName').focus()"
-                >
-                  <i class="fas fa-user-plus"></i>
-                  Ajouter un client
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+                <!-- Liste des Clients -->
+                <div class="table-container">
+                    <div id="clientsContainer">
+                        <!-- État vide -->
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Aucun client trouvé</h3>
+                            <p>Commencez par ajouter votre premier client à votre base de données.</p>
+                            <button id="addFirstClientBtn" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i>
+                                Ajouter votre premier client
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- Modal pour ajouter/modifier un client -->
+    <!-- Modal Client -->
     <div id="clientModal" class="modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="closeClientModal()">
-          <i class="fas fa-times"></i>
-        </button>
-        <h2 class="modal-title" id="modalTitle">
-          <i class="fas fa-user-plus"></i>
-          <span id="formTitle">Ajouter un Client</span>
-        </h2>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">
+                    <i class="fas fa-user-plus"></i>
+                    <span id="formTitle">Ajouter un Client</span>
+                </h2>
+                <button class="modal-close" onclick="closeClientModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="clientForm" class="modal-form">
+                <input type="hidden" id="clientId" />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientName" class="form-label">
+                            <i class="fas fa-signature"></i>
+                            Nom du client *
+                        </label>
+                        <input
+                            type="text"
+                            id="clientName"
+                            class="form-input"
+                            required
+                            placeholder="Entrez le nom complet"
+                        />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientEmail" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Adresse email *
+                        </label>
+                        <input
+                            type="email"
+                            id="clientEmail"
+                            class="form-input"
+                            required
+                            placeholder="client@entreprise.com"
+                        />
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientPhone" class="form-label">
+                            <i class="fas fa-phone"></i>
+                            Téléphone
+                        </label>
+                        <input
+                            type="tel"
+                            id="clientPhone"
+                            class="form-input"
+                            placeholder="+33 1 23 45 67 89"
+                        />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientStatus" class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Statut
+                        </label>
+                        <select id="clientStatus" class="form-input">
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="lead">Lead</option>
+                        </select>
+                    </div>
+                </div>
+                
+                
+                
+                
 
-        <form id="clientForm">
-          <input type="hidden" id="clientId" />
-
-          <div class="form-group">
-            <label for="clientName" class="form-label">
-              <i class="fas fa-signature"></i>
-              Nom du client *
-            </label>
-            <input
-              type="text"
-              id="clientName"
-              class="form-input"
-              required
-              placeholder="Entrez le nom du client"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="clientEmail" class="form-label">
-              <i class="fas fa-envelope"></i>
-              Adresse email *
-            </label>
-            <input
-              type="email"
-              id="clientEmail"
-              class="form-input"
-              required
-              placeholder="client@example.com"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="clientPhone" class="form-label">
-              <i class="fas fa-phone"></i>
-              Téléphone
-            </label>
-            <input
-              type="tel"
-              id="clientPhone"
-              class="form-input"
-              placeholder="+33 1 23 45 67 89"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="clientStatus" class="form-label">
-              <i class="fas fa-tag"></i>
-              Statut
-            </label>
-            <select id="clientStatus" class="form-input">
-              <option value="actif">Actif</option>
-              <option value="inactif">Inactif</option>
-              <option value="lead">Lead</option>
-            </select>
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeClientModal()"
-            >
-              <i class="fas fa-times"></i>
-              Annuler
-            </button>
-            <button type="submit" class="btn btn-primary" id="submitBtn">
-              <i class="fas fa-save"></i>
-              Enregistrer
-            </button>
-          </div>
-        </form>
-      </div>
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="closeClientModal()"
+                    >
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <script src="../assets/scripts/CRM/script_index_CRM.js"></script>
-  </body>
+    <script src="./scripts/script_index_CRM.js"></script>
+</body>
 </html>
