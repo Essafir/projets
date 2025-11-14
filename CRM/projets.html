@@ -1,146 +1,196 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Projets du Client - Mini CRM</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/styles/CRM/style_projets_CRM.css">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../assets/styles/CRM/style_projets_CRM.css" />
+  </head>
+  <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <a href="index.html" class="back-button">
-                    <i class="fas fa-arrow-left"></i>
-                    Retour aux clients
-                </a>
-                <h1 class="app-title">
-                    <i class="fas fa-folder"></i>
-                    <span id="clientName">Projets du Client</span>
-                </h1>
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-content">
+          <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Retour aux clients
+          </a>
+          <h1 class="app-title">
+            <i class="fas fa-folder"></i>
+            <span id="clientName">Projets du Client</span>
+          </h1>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Actions et Statistiques -->
+        <section class="actions-section">
+          <div class="projects-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="totalProjects">0</div>
+              <div class="stat-label">Total</div>
             </div>
-        </header>
+            <div class="stat-card">
+              <div class="stat-number" id="activeProjects">0</div>
+              <div class="stat-label">En cours</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="completedProjects">0</div>
+              <div class="stat-label">Terminés</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="overdueProjects">0</div>
+              <div class="stat-label">En retard</div>
+            </div>
+          </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Actions et Statistiques -->
-            <section class="actions-section">
-                <div class="projects-stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalProjects">0</div>
-                        <div class="stat-label">Total</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="activeProjects">0</div>
-                        <div class="stat-label">En cours</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="completedProjects">0</div>
-                        <div class="stat-label">Terminés</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="overdueProjects">0</div>
-                        <div class="stat-label">En retard</div>
-                    </div>
-                </div>
-                <button id="addProjectBtn" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Nouveau Projet
+          <section class="filters-section">
+            <div class="filters-grid">
+              <button id="addProjectBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Nouveau Projet
+              </button>
+              <div class="form-group">
+                <label for="searchInput" class="form-label">
+                  <i class="fas fa-search"></i>
+                  Rechercher un client
+                </label>
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="form-input"
+                  placeholder="Nom de projet"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="statusFilter" class="form-label">
+                  <i class="fas fa-filter"></i>
+                  Filtrer par statut
+                </label>
+                <select id="statusFilter" class="form-input">
+                  <option value="">Tous les statuts</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="terminé">Terminé</option>
+                  <option value="en_retard">En retard</option>
+                </select>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Liste des projets -->
+        <section class="projects-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-tasks"></i>
+              Liste des Projets
+            </h2>
+          </div>
+          <div class="table-container">
+            <div id="projectsContainer">
+              <!-- État vide -->
+              <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>Aucun projet trouvé</h3>
+                <p>Commencez par créer votre premier projet pour ce client.</p>
+                <button
+                  class="btn btn-primary"
+                  onclick="document.getElementById('addProjectBtn').click()"
+                >
+                  <i class="fas fa-plus"></i>
+                  Créer un projet
                 </button>
-            </section>
-
-            <!-- Liste des projets -->
-            <section class="projects-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-tasks"></i>
-                        Liste des Projets
-                    </h2>
-                </div>
-                <div class="table-container">
-                    <div id="projectsContainer">
-                        <!-- État vide -->
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open"></i>
-                            <h3>Aucun projet trouvé</h3>
-                            <p>Commencez par créer votre premier projet pour ce client.</p>
-                            <button class="btn btn-primary" onclick="document.getElementById('addProjectBtn').click()">
-                                <i class="fas fa-plus"></i>
-                                Créer un projet
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <!-- Modal pour ajouter/modifier un projet -->
     <div id="projectModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">
-                <i class="fas fa-times"></i>
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="modal-title" id="modalTitle">
+          <i class="fas fa-plus"></i>
+          Nouveau Projet
+        </h2>
+
+        <form id="projectForm">
+          <input type="hidden" id="projectId" />
+
+          <div class="form-group">
+            <label for="projectTitle" class="form-label">
+              <i class="fas fa-heading"></i>
+              Titre du projet *
+            </label>
+            <input
+              type="text"
+              id="projectTitle"
+              class="form-input"
+              required
+              placeholder="Ex: Site web corporatif"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="projectDescription" class="form-label">
+              <i class="fas fa-align-left"></i>
+              Description
+            </label>
+            <textarea
+              id="projectDescription"
+              class="form-input"
+              placeholder="Décrivez les détails du projet..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="projectStatus" class="form-label">
+              <i class="fas fa-tag"></i>
+              Statut
+            </label>
+            <select id="projectStatus" class="form-input">
+              <option value="en_cours">En cours</option>
+              <option value="terminé">Terminé</option>
+              <option value="en_retard">En retard</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="projectDueDate" class="form-label">
+              <i class="fas fa-calendar-alt"></i>
+              Date d'échéance
+            </label>
+            <input type="date" id="projectDueDate" class="form-input" />
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeModal()"
+            >
+              <i class="fas fa-times"></i>
+              Annuler
             </button>
-            <h2 class="modal-title" id="modalTitle">
-                <i class="fas fa-plus"></i>
-                Nouveau Projet
-            </h2>
-            
-            <form id="projectForm">
-                <input type="hidden" id="projectId">
-                
-                <div class="form-group">
-                    <label for="projectTitle" class="form-label">
-                        <i class="fas fa-heading"></i>
-                        Titre du projet *
-                    </label>
-                    <input type="text" id="projectTitle" class="form-input" required placeholder="Ex: Site web corporatif">
-                </div>
-
-                <div class="form-group">
-                    <label for="projectDescription" class="form-label">
-                        <i class="fas fa-align-left"></i>
-                        Description
-                    </label>
-                    <textarea id="projectDescription" class="form-input" placeholder="Décrivez les détails du projet..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="projectStatus" class="form-label">
-                        <i class="fas fa-tag"></i>
-                        Statut
-                    </label>
-                    <select id="projectStatus" class="form-input">
-                        <option value="en_cours">En cours</option>
-                        <option value="terminé">Terminé</option>
-                        <option value="en_retard">En retard</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="projectDueDate" class="form-label">
-                        <i class="fas fa-calendar-alt"></i>
-                        Date d'échéance
-                    </label>
-                    <input type="date" id="projectDueDate" class="form-input">
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
-                        <i class="fas fa-times"></i>
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-save"></i>
-                        Enregistrer
-                    </button>
-                </div>
-            </form>
-        </div>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="fas fa-save"></i>
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script src="../assets/scripts/CRM/script_projets_CRM.js"></script>
-</body>
+  </body>
 </html>
