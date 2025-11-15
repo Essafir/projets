@@ -1,393 +1,424 @@
 // Constantes
 const PROJECTS_KEY = "crm_projects";
 const CLIENTS_KEY = "crm_clients";
-let projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+
+// Variables globales (initialisées plus tard)
+let projects = [];
 let currentClientId = null;
 let filteredProjects = [];
 
-// Éléments DOM
-const clientNameElement = document.getElementById("clientName");
-const projectsContainer = document.getElementById("projectsContainer");
-const addProjectBtn = document.getElementById("addProjectBtn");
-const projectModal = document.getElementById("projectModal");
-const modalTitle = document.getElementById("modalTitle");
-const projectForm = document.getElementById("projectForm");
-const searchInput = document.getElementById("searchInput");
-const statusFilter = document.getElementById("statusFilter");
+// Déclaration des éléments DOM (valeurs attribuées après chargement)
+let clientNameElement,
+    projectsContainer,
+    addProjectBtn,
+    projectModal,
+    modalTitle,
+    projectForm,
+    searchInput,
+    statusFilter,
+    paymentFilter,
+    totalProjectsElement,
+    activeProjectsElement,
+    completedProjectsElement,
+    overdueProjectsElement,
+    monthlyRevenueElement,
+    totalRevenueElement;
 
-// Éléments statistiques
-const totalProjectsElement = document.getElementById("totalProjects");
-const activeProjectsElement = document.getElementById("activeProjects");
-const completedProjectsElement = document.getElementById("completedProjects");
-const overdueProjectsElement = document.getElementById("overdueProjects");
-
-// Initialisation
+// Initialisation après chargement du DOM
 document.addEventListener("DOMContentLoaded", function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  currentClientId = urlParams.get("clientId");
+    console.log("🚀 Initialisation de la page Projets");
 
-  if (!currentClientId) {
-    alert("Client non spécifié");
-    window.location.href = "index.html";
-    return;
-  }
+    // 🔥 Récupérer les éléments DOM maintenant que la page est chargée
+    clientNameElement = document.getElementById("clientName");
+    projectsContainer = document.getElementById("projectsContainer");
+    addProjectBtn = document.getElementById("addProjectBtn");
+    projectModal = document.getElementById("projectModal");
+    modalTitle = document.getElementById("modalTitle");
+    projectForm = document.getElementById("projectForm");
+    searchInput = document.getElementById("searchInput");
+    statusFilter = document.getElementById("statusFilter");
+    paymentFilter = document.getElementById("paymentFilter");
+    totalProjectsElement = document.getElementById("totalProjects");
+    activeProjectsElement = document.getElementById("activeProjects");
+    completedProjectsElement = document.getElementById("completedProjects");
+    overdueProjectsElement = document.getElementById("overdueProjects");
+    monthlyRevenueElement = document.getElementById("monthlyRevenue");
+    totalRevenueElement = document.getElementById("totalRevenue");
 
-  loadClientData();
-  loadProjects();
-  updateStatistics();
-  setupEventListeners();
+    // Récupérer l'ID du client depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentClientId = urlParams.get("clientId");
+
+    if (!currentClientId) {
+        alert("Client non spécifié");
+        window.location.href = "index.html";
+        return;
+    }
+
+    // Charger les données
+    projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+    
+    // Charger l'interface
+    loadClientData();
+    loadProjects();
+    updateStatistics();
+    setupEventListeners();
 });
-
-// Événements
-function setupEventListeners() {
-  addProjectBtn.addEventListener("click", openAddModal);
-  projectForm.addEventListener("submit", handleFormSubmit);
-  searchInput.addEventListener("input", applyFilters);
-  statusFilter.addEventListener("change", applyFilters);
-}
 
 // Charger les données du client
 function loadClientData() {
-  const clients = JSON.parse(localStorage.getItem(CLIENTS_KEY) || "[]");
-  const client = clients.find((c) => c.id === currentClientId);
-
-  if (client) {
-    clientNameElement.textContent = `Projets de ${client.name}`;
-  } else {
-    clientNameElement.textContent = "Projets du Client";
-    console.warn("Client non trouvé");
-  }
+    const clients = JSON.parse(localStorage.getItem(CLIENTS_KEY) || "[]");
+    const client = clients.find((c) => c.id === currentClientId);
+    if (client && clientNameElement) {
+        clientNameElement.textContent = `Projets de ${client.name}`;
+    } else if (clientNameElement) {
+        clientNameElement.textContent = "Projets du Client";
+    }
 }
 
 // Charger et afficher les projets
 function loadProjects() {
-  const clientProjects = projects.filter((p) => p.clientId === currentClientId);
-  filteredProjects = clientProjects;
-  displayProjects(filteredProjects);
+    const clientProjects = projects.filter((p) => p.clientId === currentClientId);
+    filteredProjects = clientProjects;
+    displayProjects(filteredProjects);
 }
 
 // Appliquer les filtres
 function applyFilters() {
-  const clientProjects = projects.filter((p) => p.clientId === currentClientId);
-  const searchTerm = searchInput.value.toLowerCase();
-  const statusValue = statusFilter.value;
+    const clientProjects = projects.filter((p) => p.clientId === currentClientId);
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusValue = statusFilter ? statusFilter.value : '';
+    const paymentValue = paymentFilter ? paymentFilter.value : '';
 
-  filteredProjects = clientProjects.filter((project) => {
-    // Filtre par recherche (titre et description)
-    const matchesSearch =
-      !searchTerm ||
-      project.title.toLowerCase().includes(searchTerm) ||
-      (project.description &&
-        project.description.toLowerCase().includes(searchTerm));
+    filteredProjects = clientProjects.filter((project) => {
+        const displayStatus = getDisplayStatus(project);
 
-    // Filtre par statut
-    const matchesStatus = !statusValue || project.status === statusValue;
+        const matchesSearch =
+            !searchTerm ||
+            project.title.toLowerCase().includes(searchTerm) ||
+            (project.description && project.description.toLowerCase().includes(searchTerm));
 
-    return matchesSearch && matchesStatus;
-  });
+        const matchesStatus = !statusValue || project.status === statusValue;
 
-  displayProjects(filteredProjects);
+        const matchesPayment = !paymentValue ||
+            (paymentValue === "paid" && project.isPaid) ||
+            (paymentValue === "unpaid" && !project.isPaid);
+
+        return matchesSearch && matchesStatus && matchesPayment;
+    });
+
+    displayProjects(filteredProjects);
+}
+
+// Fonction pour obtenir le statut affiché (avec détection "en retard")
+function getDisplayStatus(project) {
+    if (project.status === "terminé") return "terminé";
+    if (project.dueDate && new Date(project.dueDate) < new Date()) return "en_retard";
+    return project.status;
 }
 
 // Afficher les projets
 function displayProjects(projectsToDisplay) {
-  if (projectsToDisplay.length === 0) {
-    projectsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-folder-open"></i>
-                        <h3>Aucun projet trouvé</h3>
-                        <p>Ajustez vos filtres ou créez un nouveau projet.</p>
-                        <button class="btn btn-primary" onclick="document.getElementById('addProjectBtn').click()">
-                            <i class="fas fa-plus"></i>
-                            Créer un projet
-                        </button>
-                    </div>
-                `;
-    return;
-  }
+    if (!projectsContainer) return;
 
-  const table = document.createElement("table");
-  table.className = "projects-table";
+    if (projectsToDisplay.length === 0) {
+        projectsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>Aucun projet trouvé</h3>
+                <p>Ajustez vos filtres ou créez un nouveau projet.</p>
+                <button class="btn btn-primary" onclick="triggerAddProject()">
+                    <i class="fas fa-plus"></i> Créer un projet
+                </button>
+            </div>
+        `;
+        return;
+    }
 
-  // En-tête du tableau
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-                <tr>
-                    <th>Projet</th>
-                    <th>Description</th>
-                    <th>Statut</th>
-                    <th>Échéance</th>
-                    <th>Date création</th>
-                    <th>Actions</th>
-                </tr>
-            `;
-  table.appendChild(thead);
+    const table = document.createElement("table");
+    table.className = "projects-table";
 
-  // Corps du tableau
-  const tbody = document.createElement("tbody");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+        <tr>
+            <th>Projet</th>
+            <th>Description</th>
+            <th>Statut</th>
+            <th>Échéance</th>
+            <th>Montant (MAD)</th>
+            <th>Date création</th>
+            <th>Actions</th>
+        </tr>
+    `;
+    table.appendChild(thead);
 
-  projectsToDisplay.forEach((project) => {
-    const row = document.createElement("tr");
-    const isOverdue =
-      project.dueDate &&
-      new Date(project.dueDate) < new Date() &&
-      project.status !== "terminé";
-    const dueDateClass = isOverdue
-      ? 'style="color: var(--danger); font-weight: 600;"'
-      : "";
+    const tbody = document.createElement("tbody");
+    projectsToDisplay.forEach((project) => {
+        const displayStatus = getDisplayStatus(project);
+        const isOverdue = displayStatus === "en_retard";
 
-    row.innerHTML = `
-                    <td data-label="Projet">
-                        <div style="font-weight: 600; color: var(--dark); margin-bottom: 4px;">${escapeHtml(
-                          project.title
-                        )}</div>
-                    </td>
-                    <td data-label="Description">
-                        <div style="color: var(--gray); line-height: 1.4;">
-                            ${escapeHtml(
-                              project.description || "Aucune description"
-                            )}
-                        </div>
-                    </td>
-                    <td data-label="Statut">
-                        <span class="status-badge status-${project.status}">
-                            ${getStatusText(project.status)}
-                        </span>
-                    </td>
-                    <td data-label="Échéance" ${dueDateClass}>
-                        ${
-                          project.dueDate
-                            ? formatDate(project.dueDate)
-                            : "Non définie"
-                        }
-                        ${isOverdue ? " ⚠️" : ""}
-                    </td>
-                    <td data-label="Date création">
-                        <div style="font-size: 0.9rem; color: var(--gray);">
-                            ${formatDate(project.createdAt)}
-                        </div>
-                    </td>
-                    <td data-label="Actions">
-                        <div class="action-buttons">
-                            <button onclick="editProject('${
-                              project.id
-                            }')" class="action-btn btn-warning">
-                                <i class="fas fa-edit"></i>
-                                Modifier
-                            </button>
-                            <button onclick="deleteProject('${
-                              project.id
-                            }')" class="action-btn btn-danger">
-                                <i class="fas fa-trash"></i>
-                                Supprimer
-                            </button>
-                        </div>
-                    </td>
-                `;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td data-label="Projet">
+                <div style="font-weight: 600; color: var(--dark); margin-bottom: 4px;">${escapeHtml(project.title)}</div>
+            </td>
+            <td data-label="Description">
+                <div style="color: var(--gray); line-height: 1.4;">${escapeHtml(project.description || "Aucune description")}</div>
+            </td>
+            <td data-label="Statut">
+                <span class="status-badge status-${displayStatus}">${getStatusText(displayStatus)}</span>
+            </td>
+            <td data-label="Échéance" ${isOverdue ? 'style="color: var(--danger); font-weight: 600;"' : ""}>
+                ${project.dueDate ? formatDate(project.dueDate) : "Non définie"}
+                ${isOverdue ? ' <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>' : ""}
+            </td>
+            <td data-label="Montant (MAD)">
+                <div style="font-weight: 600; color: var(--dark);">
+                    ${project.amount ? project.amount.toLocaleString('fr-FR') + ' MAD' : '—'}
+                </div>
+                <div style="font-size: 0.85rem; ${project.isPaid ? 'color: var(--success);' : 'color: var(--gray);'}">
+                    ${project.isPaid ? '<i class="fas fa-check-circle"></i> Payé' : '<i class="fas fa-clock"></i> Non payé'}
+                </div>
+            </td>
+            <td data-label="Date création">
+                <div style="font-size: 0.9rem; color: var(--gray);">${formatDate(project.createdAt)}</div>
+            </td>
+            <td data-label="Actions">
+                <div class="action-buttons">
+                    <button onclick="editProject('${project.id}')" class="action-btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button onclick="deleteProject('${project.id}')" class="action-btn btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
 
-    tbody.appendChild(row);
-  });
-
-  table.appendChild(tbody);
-  projectsContainer.innerHTML = "";
-  projectsContainer.appendChild(table);
+    table.appendChild(tbody);
+    projectsContainer.innerHTML = "";
+    projectsContainer.appendChild(table);
 }
 
 // Mettre à jour les statistiques
 function updateStatistics() {
-  const clientProjects = projects.filter((p) => p.clientId === currentClientId);
-  const total = clientProjects.length;
-  const active = clientProjects.filter((p) => p.status === "en_cours").length;
-  const completed = clientProjects.filter((p) => p.status === "terminé").length;
-  const overdue = clientProjects.filter((p) => p.status === "en_retard").length;
-  //     p.dueDate && new Date(p.dueDate) < new Date() && p.status !== 'terminé'
-  // ).length;
+    const clientProjects = projects.filter((p) => p.clientId === currentClientId);
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
-  totalProjectsElement.textContent = total;
-  activeProjectsElement.textContent = active;
-  completedProjectsElement.textContent = completed;
-  overdueProjectsElement.textContent = overdue;
+    const total = clientProjects.length;
+    const active = clientProjects.filter(p => p.status === "en_cours").length;
+    const completed = clientProjects.filter(p => p.status === "terminé").length;
+    const overdue = clientProjects.filter(p => 
+        p.status !== "terminé" && p.dueDate && new Date(p.dueDate) < now
+    ).length;
+
+    const monthlyRevenue = clientProjects
+        .filter(p => p.isPaid && new Date(p.createdAt).getMonth() === currentMonth && new Date(p.createdAt).getFullYear() === currentYear)
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const totalRevenue = clientProjects
+        .filter(p => p.isPaid)
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    if (totalProjectsElement) totalProjectsElement.textContent = total;
+    if (activeProjectsElement) activeProjectsElement.textContent = active;
+    if (completedProjectsElement) completedProjectsElement.textContent = completed;
+    if (overdueProjectsElement) overdueProjectsElement.textContent = overdue;
+    if (monthlyRevenueElement) monthlyRevenueElement.textContent = monthlyRevenue.toLocaleString('fr-FR') + ' MAD';
+    if (totalRevenueElement) totalRevenueElement.textContent = totalRevenue.toLocaleString('fr-FR') + ' MAD';
+}
+
+// Configurer les écouteurs d'événements
+function setupEventListeners() {
+    if (addProjectBtn) {
+        addProjectBtn.addEventListener("click", openAddModal);
+    }
+    if (projectForm) {
+        projectForm.addEventListener("submit", handleFormSubmit);
+    }
+    if (searchInput) {
+        searchInput.addEventListener("input", debounce(applyFilters, 300));
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener("change", applyFilters);
+    }
+    if (paymentFilter) {
+        paymentFilter.addEventListener("change", applyFilters);
+    }
+    if (projectModal) {
+        projectModal.addEventListener("click", function(e) {
+            if (e.target === projectModal) closeModal();
+        });
+    }
 }
 
 // Ouvrir le modal d'ajout
 function openAddModal() {
-  modalTitle.innerHTML = '<i class="fas fa-plus"></i> Nouveau Projet';
-  projectForm.reset();
-  document.getElementById("projectId").value = "";
-  document.getElementById("projectStatus").value = "en_cours";
+    if (!modalTitle || !projectForm || !projectModal) return;
 
-  // Définir la date minimale à aujourd'hui
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("projectDueDate").min = today;
+    modalTitle.innerHTML = '<i class="fas fa-plus"></i> Nouveau Projet';
+    projectForm.reset();
+    document.getElementById("projectId").value = "";
+    document.getElementById("projectStatus").value = "en_cours";
+    document.getElementById("projectIsPaid").checked = false;
+    
+    const today = new Date().toISOString().split("T")[0];
+    const dueDateInput = document.getElementById("projectDueDate");
+    if (dueDateInput) dueDateInput.min = today;
 
-  projectModal.style.display = "block";
+    projectModal.style.display = "block";
+}
+
+// Fonction utilitaire pour le bouton dans l'état vide
+function triggerAddProject() {
+    if (addProjectBtn) addProjectBtn.click();
 }
 
 // Fermer le modal
 function closeModal() {
-  projectModal.style.display = "none";
+    if (projectModal) projectModal.style.display = "none";
 }
 
-// Soumission du formulaire
+// Gérer la soumission du formulaire
 function handleFormSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const projectId = document.getElementById("projectId").value;
-  const title = document.getElementById("projectTitle").value.trim();
-  const description = document
-    .getElementById("projectDescription")
-    .value.trim();
-  const status = document.getElementById("projectStatus").value;
-  const dueDate = document.getElementById("projectDueDate").value;
+    const projectId = document.getElementById("projectId").value;
+    const title = document.getElementById("projectTitle").value.trim();
+    const description = document.getElementById("projectDescription").value.trim();
+    const status = document.getElementById("projectStatus").value;
+    const dueDate = document.getElementById("projectDueDate").value;
+    const amount = parseFloat(document.getElementById("projectAmount").value) || 0;
+    const isPaid = document.getElementById("projectIsPaid").checked;
 
-  if (!title) {
-    alert("Le titre est obligatoire");
-    return;
-  }
+    if (!title || amount <= 0) {
+        showAlert("Le titre et un montant > 0 sont obligatoires", "error");
+        return;
+    }
 
-  if (projectId) {
-    updateProject(projectId, { title, description, status, dueDate });
-  } else {
-    addProject({ title, description, status, dueDate });
-  }
+    if (projectId) {
+        updateProject(projectId, { title, description, status, dueDate, amount, isPaid });
+    } else {
+        addProject({ title, description, status, dueDate, amount, isPaid });
+    }
 
-  closeModal();
-  loadProjects();
-  updateStatistics();
+    closeModal();
+    loadProjects();
+    updateStatistics();
 }
 
 // Ajouter un projet
 function addProject(projectData) {
-  const newProject = {
-    id: "project_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
-    clientId: currentClientId,
-    title: projectData.title,
-    description: projectData.description,
-    status: projectData.status,
-    dueDate: projectData.dueDate,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  projects.push(newProject);
-  saveProjects();
-  showAlert("Projet ajouté avec succès!", "success");
+    const newProject = {
+        id: "project_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
+        clientId: currentClientId,
+        title: projectData.title,
+        description: projectData.description,
+        status: projectData.status,
+        dueDate: projectData.dueDate,
+        amount: projectData.amount,
+        isPaid: projectData.isPaid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+    projects.push(newProject);
+    saveProjects();
+    showAlert("Projet ajouté avec succès!", "success");
 }
 
 // Modifier un projet
 function updateProject(projectId, projectData) {
-  const projectIndex = projects.findIndex((p) => p.id === projectId);
-
-  if (projectIndex !== -1) {
-    projects[projectIndex] = {
-      ...projects[projectIndex],
-      ...projectData,
-      updatedAt: new Date().toISOString(),
-    };
-
-    saveProjects();
-    showAlert("Projet modifié avec succès!", "success");
-  }
+    const projectIndex = projects.findIndex((p) => p.id === projectId);
+    if (projectIndex !== -1) {
+        projects[projectIndex] = { ...projects[projectIndex], ...projectData, updatedAt: new Date().toISOString() };
+        saveProjects();
+        showAlert("Projet modifié avec succès!", "success");
+    }
 }
 
 // Éditer un projet
 function editProject(projectId) {
-  const project = projects.find((p) => p.id === projectId);
-
-  if (project) {
-    modalTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier le Projet';
-    document.getElementById("projectId").value = project.id;
-    document.getElementById("projectTitle").value = project.title;
-    document.getElementById("projectDescription").value =
-      project.description || "";
-    document.getElementById("projectStatus").value = project.status;
-    document.getElementById("projectDueDate").value = project.dueDate || "";
-
-    projectModal.style.display = "block";
-  }
+    const project = projects.find((p) => p.id === projectId);
+    if (project && modalTitle && projectModal) {
+        modalTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier le Projet';
+        document.getElementById("projectId").value = project.id;
+        document.getElementById("projectTitle").value = project.title;
+        document.getElementById("projectDescription").value = project.description || "";
+        document.getElementById("projectStatus").value = project.status;
+        document.getElementById("projectDueDate").value = project.dueDate || "";
+        document.getElementById("projectAmount").value = project.amount || "";
+        document.getElementById("projectIsPaid").checked = project.isPaid || false;
+        projectModal.style.display = "block";
+    }
 }
 
 // Supprimer un projet
 function deleteProject(projectId) {
-  if (confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
-    projects = projects.filter((p) => p.id !== projectId);
-    saveProjects();
-    applyFilters();
-    updateStatistics();
-    showAlert("Projet supprimé avec succès!", "success");
-  }
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
+        projects = projects.filter((p) => p.id !== projectId);
+        saveProjects();
+        applyFilters();
+        updateStatistics();
+        showAlert("Projet supprimé avec succès!", "success");
+    }
 }
 
 // Sauvegarder les projets
 function saveProjects() {
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+    localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
 }
 
 // Fonctions utilitaires
 function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function getStatusText(status) {
-  const statusMap = {
-    en_cours: "En cours",
-    terminé: "Terminé",
-    en_retard: "En retard",
-  };
-  return statusMap[status] || status;
+    const map = { en_cours: "En cours", terminé: "Terminé", en_retard: "En retard" };
+    return map[status] || status;
 }
 
 function formatDate(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("fr-FR");
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("fr-FR");
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 function showAlert(message, type) {
-  // Créer une alerte temporaire
-  const alert = document.createElement("div");
-  alert.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 10px;
-                color: white;
-                font-weight: 600;
-                z-index: 10000;
-                animation: slideInRight 0.3s ease;
-                box-shadow: var(--shadow-lg);
-            `;
-
-  if (type === "success") {
-    alert.style.background = "var(--success)";
-  } else if (type === "error") {
-    alert.style.background = "var(--danger)";
-  } else if (type === "warning") {
-    alert.style.background = "var(--warning)";
-  }
-
-  alert.innerHTML = `
-                <i class="fas fa-${
-                  type === "success"
-                    ? "check"
-                    : type === "error"
-                    ? "exclamation-triangle"
-                    : "info-circle"
-                }"></i>
-                ${message}
-            `;
-
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 3000);
+    const alert = document.createElement("div");
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === "success" ? "check" : "exclamation-triangle"}"></i>
+        ${message}
+        <button class="alert-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    document.body.appendChild(alert);
+    setTimeout(() => {
+        if (alert.parentElement) alert.remove();
+    }, 5000);
 }
 
 // Exposer les fonctions globalement
 window.editProject = editProject;
 window.deleteProject = deleteProject;
 window.closeModal = closeModal;
+window.triggerAddProject = triggerAddProject;

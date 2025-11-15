@@ -54,12 +54,16 @@ const elements = {
     clientsCount: document.getElementById("clientsCount"),
     activeCount: document.getElementById("activeCount"),
     inactiveCount: document.getElementById("inactiveCount"),
-    leadCount: document.getElementById("leadCount")
+    leadCount: document.getElementById("leadCount"),
+    
+    // 🔥 NOUVEAU : Revenu total
+    totalRevenueMain: document.getElementById("totalRevenueMain")
 };
 
 // Variables pour les graphiques
 let statusPieChart = null;
 let monthlyLineChart = null;
+let revenueChart = null; // 🔥
 
 // ==============================
 // INITIALISATION DE L'APPLICATION
@@ -563,7 +567,7 @@ function isValidEmail(email) {
 
 function escapeHtml(text) {
     if (!text) return '';
-    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return text.replace(/</g, "<").replace(/>/g, ">");
 }
 
 function getStatusText(status) {
@@ -660,6 +664,12 @@ function updateStatistics() {
         return clientDate.getMonth() === currentMonth && clientDate.getFullYear() === currentYear;
     }).length;
 
+    // 🔥 Calcul du revenu total (tous les projets payés)
+    const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+    const totalRevenue = projects
+        .filter(p => p.isPaid)
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
+
     // Mettre à jour les éléments
     if (elements.totalClients) elements.totalClients.textContent = total;
     if (elements.activePercentage) elements.activePercentage.textContent = activePercentage + "%";
@@ -669,6 +679,7 @@ function updateStatistics() {
     if (elements.activeCount) elements.activeCount.textContent = active;
     if (elements.inactiveCount) elements.inactiveCount.textContent = inactive;
     if (elements.leadCount) elements.leadCount.textContent = lead;
+    if (elements.totalRevenueMain) elements.totalRevenueMain.textContent = totalRevenue.toLocaleString('fr-FR') + ' MAD';
 }
 
 // ==============================
@@ -679,6 +690,7 @@ function initializeCharts() {
     console.log("📈 Initialisation des graphiques");
     createStatusPieChart();
     createMonthlyLineChart();
+    createRevenueLineChart(); // 🔥
 }
 
 function createStatusPieChart() {
@@ -810,10 +822,81 @@ function generateMonthlyData() {
     return monthlyCounts;
 }
 
+// 🔥 NOUVEAU : Graphique de revenu mensuel
+function createRevenueLineChart() {
+    const ctx = document.getElementById('revenueLineChart');
+    if (!ctx) {
+        console.error("❌ Canvas revenueLineChart non trouvé");
+        return;
+    }
+
+    if (revenueChart) {
+        revenueChart.destroy();
+    }
+
+    const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+    const monthlyRevenue = new Array(12).fill(0);
+
+    projects
+        .filter(p => p.isPaid)
+        .forEach(p => {
+            const month = new Date(p.createdAt).getMonth();
+            monthlyRevenue[month] += p.amount || 0;
+        });
+
+    revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+            datasets: [{
+                label: 'Revenu (MAD)',
+                data: monthlyRevenue,
+                borderColor: '#2a9d8f',
+                backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#2a9d8f',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR') + ' MAD';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
 function updateCharts() {
     console.log("🔄 Mise à jour des graphiques");
     createStatusPieChart();
     createMonthlyLineChart();
+    createRevenueLineChart(); // 🔥
 }
 
 // ==============================
@@ -846,6 +929,7 @@ function exportToCSV() {
     const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
     const BOM = "\uFEFF";
 
+    // 🔥 Mise à jour des en-têtes
     const headers = [
         "ID Client",
         "Nom",
@@ -853,8 +937,8 @@ function exportToCSV() {
         "Téléphone",
         "Statut",
         "Projets totaux",
-        "Projets en cours",
-        "Projets terminés",
+        "Revenu total (MAD)",
+        "Projets payés",
         "Date création",
     ];
     let csvContent = BOM + headers.join(";") + "\n";
@@ -864,12 +948,12 @@ function exportToCSV() {
             (project) => project.clientId === client.id
         );
         const totalProjects = clientProjects.length;
-        const activeProjects = clientProjects.filter(
-            (p) => p.status === "en_cours"
-        ).length;
-        const completedProjects = clientProjects.filter(
-            (p) => p.status === "terminé"
-        ).length;
+        
+        // 🔥 Calcul du revenu et des projets payés
+        const paidProjects = clientProjects.filter(p => p.isPaid).length;
+        const revenue = clientProjects
+            .filter(p => p.isPaid)
+            .reduce((sum, p) => sum + (p.amount || 0), 0);
 
         const row = [
             `"${client.id}"`,
@@ -878,8 +962,8 @@ function exportToCSV() {
             `"${client.phone || ""}"`,
             `"${getStatusText(client.status)}"`,
             `"${totalProjects}"`,
-            `"${activeProjects}"`,
-            `"${completedProjects}"`,
+            `"${revenue.toLocaleString('fr-FR')}"`,
+            `"${paidProjects}"`,
             `"${formatDate(client.createdAt)}"`,
         ];
         csvContent += row.join(";") + "\n";
