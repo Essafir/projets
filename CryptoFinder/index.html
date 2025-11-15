@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Crypto Recherche</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Recherche Crypto</h1>
-    <input type="text" id="recherche" placeholder="bitcoin, ethereum...">
-    <button onclick="chercherCrypto()">Chercher</button>
-    <div id="resultat"></div>
+    <div class="container">
+        <h1>Recherche Crypto</h1>
+        <div class="controls">
+            <input type="text" id="recherche" placeholder="bitcoin, ethereum...">
+            <button onclick="chercherCrypto()">Chercher</button>
+        </div>
+        <div id="resultat"></div>
+        <div class="footer-note">Données fournies par CoinGecko</div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
