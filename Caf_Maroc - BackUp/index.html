@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="CAF 2025 Maroc - Explorez les matchs, stades et informations sur la Coupe d'Afrique des Nations 2025" />
+  <meta name="keywords" content="CAF 2025, Maroc, football, Coupe d'Afrique, matchs, stades" />
+  <meta name="author" content="CAF 2025 Maroc" />
+  <meta name="theme-color" content="#006A3B" />
+  <title>CAF 2025 – Maroc | Coupe d'Afrique des Nations</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="modern-header">
+    <div class="container">
+      <h1>CAF 2025 <span>Maroc</span></h1>
+      <nav>
+        <a href="index.html" class="active">Accueil</a>
+        <a href="matches.html">Matchs</a>
+        <a href="stades.html">Stades</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h2>Bienvenue à la Coupe d'Afrique des Nations 2025 ! 🌍</h2>
+        <p>Le Maroc vous accueille pour la plus grande fête du football africain</p>
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="matches.html" class="btn">🎯 Voir les Matchs</a>
+          <a href="stades.html" class="btn" style="background: var(--secondary);">🏟️ Découvrir les Stades</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats-section" class="container">
+      <h2>📊 Chiffres Clés de la CAF 2025</h2>
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-number">24</div>
+          <div class="stat-label">Équipes Participantes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">1</div>
+          <div class="stat-label">Pays Hôte (Maroc)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">6</div>
+          <div class="stat-label">Stades Modernes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">30+</div>
+          <div class="stat-label">Matchs Prévus</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Recommendations Section -->
+    <section id="recommendations-section" class="container">
+      <h2>💡 Recommandations & Services</h2>
+      <div id="recommendations-list" class="recommendations-grid">
+        <div class="loading" style="height: 200px;"></div>
+        <div class="loading" style="height: 200px;"></div>
+        <div class="loading" style="height: 200px;"></div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Info Cards Section -->
+    <!-- <section class="container" id="info-section">
+      <h2>ℹ️ Informations Pratiques</h2>
+      <div class="recommendations-grid">
+        <div class="card">
+          <h3>🎟️ Billets</h3>
+          <p>Accédez facilement à la billetterie officielle de la CAF. Les prix varient selon les matchs.</p>
+          <a href="https://www.cafonline.com" target="_blank" class="btn">Acheter des Billets</a>
+        </div>
+        <div class="card">
+          <h3>🚗 Transport</h3>
+          <p>Location de voitures, taxis et services de transport disponibles dans toutes les villes hôtes.</p>
+          <a href="#" class="btn">Explorer les Options</a>
+        </div>
+        <div class="card">
+          <h3>🏨 Hébergement</h3>
+          <p>Des hôtels de luxe aux auberges confortables. Réservez dès maintenant pour assurer votre place.</p>
+          <a href="#" class="btn">Voir les Hôtels</a>
+        </div>
+        <div class="card">
+          <h3>🍽️ Gastronomie</h3>
+          <p>Savourez la cuisine marocaine authentique dans nos meilleurs restaurants partenaires.</p>
+          <a href="#" class="btn">Découvrir</a>
+        </div>
+      </div>
+    </section> -->
+
+    <div class="divider"></div>
+  </main>
+
+  <!-- Chat Section -->
+  <section class="chat-section">
+    <div class="container">
+      <h2>💬 Communauté Africaine - African Chat</h2>
+      <p style="color: var(--gray); margin-bottom: 1.5rem;">Connectez-vous avec des supporters du monde entier ! (Messages stockés localement)</p>
+      
+      <div class="chat-controls">
+        <input 
+          type="text" 
+          id="pseudo" 
+          placeholder="Votre pseudo (ex: MarocFan)" 
+          maxlength="20"
+          autocomplete="off"
+        />
+        <textarea 
+          id="message" 
+          placeholder="Votre message... Partagez vos pensées sur la CAF 2025!"
+        ></textarea>
+        <button class="btn" onclick="sendMessage()" style="align-self: flex-start; width: auto;">
+          ✈️ Envoyer le Message
+        </button>
+      </div>
+
+      <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">📝 Derniers Messages (10 derniers)</h3>
+      <div id="chat-messages" class="chat-messages">
+        <p style="color: var(--gray); text-align: center; padding: 2rem;">
+          Aucun message. Soyez le premier à saluer la communauté! 👋
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 CAF 2025 Maroc – Projet éducatif non officiel | <a href="#">Politique de Confidentialité</a> | <a href="#">Conditions d'Utilisation</a></p>
+      <p style="margin-top: 1rem; font-size: 0.85rem;">Conçu avec ❤️ pour célébrer le football africain</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { StorageService } from './js/services/StorageService.js';
+
+    // Load recommendations
+    async function loadRecommendations() {
+      try {
+        const res = await fetch('data/recommendations.json');
+        const recs = await res.json();
+
+        const byType = recs.reduce((acc, r) => {
+          if (!acc[r.type]) acc[r.type] = [];
+          acc[r.type].push(r);
+          return acc;
+        }, {});
+
+        const typeConfig = {
+          hotel: { name: '🏨 Hôtels', badge: 'green', icon: '🏨' },
+          restaurant: { name: '🍽️ Restaurants', badge: 'gold', icon: '🍽️' },
+          car_rental: { name: '🚗 Location de Voitures', badge: 'green', icon: '🚗' },
+          ticket: { name: '🎟️ Billetterie Officielle', badge: 'red', icon: '🎟️' }
+        };
+
+        const container = document.getElementById('recommendations-list');
+        
+        container.innerHTML = Object.entries(byType).map(([type, list]) => {
+          const config = typeConfig[type] || { name: type, badge: 'green', icon: '⭐' };
+          return `
+            <div class="card">
+              <div style="margin-bottom: 1rem;">
+                <span class="badge ${config.badge}">${config.icon} ${config.name}</span>
+              </div>
+              <ul style="list-style: none; padding: 0;">
+                ${list.map((r, idx) => `
+                  <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--gray-light);">
+                    <strong style="color: var(--primary);">${r.name}</strong>
+                    ${r.city ? `<br/><small style="color: var(--gray);">📍 ${r.city}</small>` : ''}
+                    ${r.rating ? `<br/><small class="rating">⭐ ${r.rating}/5</small>` : ''}
+                    <br/>
+                    <a href="${r.link}" target="_blank" class="btn" style="margin-top: 0.5rem; display: inline-block;">
+                      Visiter →
+                    </a>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Erreur lors du chargement des recommandations:', error);
+        document.getElementById('recommendations-list').innerHTML = `
+          <div class="card" style="grid-column: 1 / -1;">
+            <p style="color: var(--gray); text-align: center;">Impossible de charger les recommandations. Veuillez réessayer.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Chat functionality
+    function renderMessages() {
+      const messages = StorageService.get('chat_messages') || [];
+      const container = document.getElementById('chat-messages');
+      
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <p style="color: var(--gray); text-align: center; padding: 2rem;">
+            Aucun message. Soyez le premier à saluer la communauté! 👋
+          </p>
+        `;
+        return;
+      }
+
+      container.innerHTML = messages.slice(-10).reverse().map(m => `
+        <div class="chat-message">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <strong style="color: var(--primary);">👤 ${m.pseudo}</strong>
+            <em style="color: var(--gray); font-size: 0.85rem;">
+              ${new Date(m.timestamp).toLocaleString('fr-FR')}
+            </em>
+          </div>
+          <p style="margin: 0; color: var(--dark-secondary); line-height: 1.5;">${m.text}</p>
+        </div>
+      `).join('');
+    }
+
+    window.sendMessage = () => {
+      const pseudo = document.getElementById('pseudo').value.trim();
+      const text = document.getElementById('message').value.trim();
+      
+      if (!pseudo) {
+        alert('⚠️ Veuillez entrer votre pseudo.');
+        return;
+      }
+      if (!text) {
+        alert('⚠️ Veuillez écrire un message.');
+        return;
+      }
+      if (pseudo.length > 20) {
+        alert('⚠️ Le pseudo ne doit pas dépasser 20 caractères.');
+        return;
+      }
+
+      const messages = StorageService.get('chat_messages') || [];
+      messages.push({
+        id: Date.now(),
+        pseudo,
+        text,
+        timestamp: new Date().toISOString()
+      });
+      StorageService.set('chat_messages', messages);
+      
+      document.getElementById('message').value = '';
+      renderMessages();
+    };
+
+    // Keyboard shortcut for sending messages
+    document.getElementById('message').addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Initialize
+    loadRecommendations();
+    renderMessages();
+  </script>
+</body>
+</html>

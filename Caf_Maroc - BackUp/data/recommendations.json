@@ -1,0 +1,37 @@
+[
+  {
+    "type": "hotel",
+    "name": "Hôtel Kenzi Tower",
+    "city": "Casablanca",
+    "rating": 4.5,
+    "link": "https://www.google.com"
+  },
+  {
+    "type": "restaurant",
+    "name": "Rick’s Café",
+    "city": "Casablanca",
+    "rating": 4.7,
+    "link": "https://www.google.com"
+  },
+  {
+    "type": "car_rental",
+    "name": "Avis Maroc",
+    "city": "",
+    "rating": 4.2,
+    "link": "https://www.avis.ma"
+  },
+  {
+    "type": "ticket",
+    "name": "Billetterie CAF Officielle",
+    "city": "",
+    "rating": null,
+    "link": "https://www.cafonline.com"
+  },
+  {
+    "type": "ticket",
+    "name": "Ticket.ma – Maroc",
+    "city": "",
+    "rating": null,
+    "link": "https://www.ticket.ma"
+  }
+]

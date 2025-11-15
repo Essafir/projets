@@ -1,0 +1,47 @@
+[
+  {
+    "id": "M001",
+    "date": "2025-01-13T18:00:00+01:00",
+    "teamA": "Maroc",
+    "teamB": "Sénégal",
+    "stade": "Stade Mohammed V",
+    "logoA": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/800px-Flag_of_Morocco.svg.png",
+    "logoB": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Flag_of_Senegal.svg/800px-Flag_of_Senegal.svg.png"
+  },
+  {
+    "id": "M002",
+    "date": "2025-01-15T20:00:00+01:00",
+    "teamA": "Côte d'Ivoire",
+    "teamB": "Nigeria",
+    "stade": "Grand Stade de Casablanca",
+    "logoA": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_C%C3%B4te_d%27Ivoire.svg/800px-Flag_of_C%C3%B4te_d%27Ivoire.svg.png",
+    "logoB": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Flag_of_Nigeria.svg/800px-Flag_of_Nigeria.svg.png"
+  },
+  {
+    "id": "M003",
+    "date": "2025-01-18T16:00:00+01:00",
+    "teamA": "Algérie",
+    "teamB": "Maroc",
+    "stade": "Stade Adrar, Agadir",
+    "logoA": "images/Flag_of_Algeria.svg.webp",
+    "logoB": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/800px-Flag_of_Morocco.svg.png"
+  },
+  {
+    "id": "M004",
+    "date": "2025-01-20T14:00:00+01:00",
+    "teamA": "Égypte",
+    "teamB": "Tunisie",
+    "stade": "Complexe Sportif Prince Moulay Abdellah",
+    "logoA": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png",
+    "logoB": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/800px-Flag_of_Tunisia.svg.png"
+  },
+  {
+    "id": "M005",
+    "date": "2025-01-22T19:00:00+01:00",
+    "teamA": "Ghana",
+    "teamB": "Cameroun",
+    "stade": "Stade de Marrakech",
+    "logoA": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Flag_of_Ghana.svg/800px-Flag_of_Ghana.svg.png",
+    "logoB": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Flag_of_Cameroon.svg/800px-Flag_of_Cameroon.svg.png"
+  }
+]

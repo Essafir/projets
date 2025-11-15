@@ -1,0 +1,44 @@
+[
+  {
+    "id": "V001",
+    "name": "Stade Mohammed V",
+    "city": "Casablanca",
+    "capacity": 67000,
+    "gps": { "lat": 33.5731, "lng": -7.6299 },
+    "description": "Historique et emblématique, le Stade Mohammed V est le cœur du football marocain. Inauguré en 1955, il a accueilli de nombreux matchs internationaux et reste l’un des joyaux sportifs du pays.",
+    "images": [
+      "images/MoulayAbdellah.jpg",
+      "images/MA1.avif",
+      "images/MA2.jpg",
+      "images/MoulayAbdellah.jpg"
+    ]
+  },
+  {
+    "id": "V002",
+    "name": "Grand Stade de Casablanca",
+    "city": "Casablanca",
+    "capacity": 93000,
+    "gps": { "lat": 33.5567, "lng": -7.6358 },
+    "description": "Futur stade ultra-moderne en construction, le Grand Stade de Casablanca sera l’un des plus grands d’Afrique. Conçu pour accueillir la Coupe du Monde 2030, il sera le joyau de la CAF 2025.",
+    "images": [
+      "images/MoulayAbdellah.jpg",
+      "images/MA1.avif",
+      "images/MA2.jpg",
+      "images/MoulayAbdellah.jpg"
+    ]
+  },
+  {
+    "id": "V003",
+    "name": "Stade Adrar",
+    "city": "Agadir",
+    "capacity": 45480,
+    "gps": { "lat": 30.4333, "lng": -9.5833 },
+    "description": "Situé au pied de l’Atlas, le Stade Adrar offre une vue spectaculaire et une ambiance unique. Modernisé pour la CAF 2025, il allie confort, sécurité et accessibilité.",
+    "images": [
+      "images/MoulayAbdellah.jpg",
+      "images/MA1.avif",
+      "images/MA2.jpg",
+      "images/MoulayAbdellah.jpg"
+    ]
+  }
+]
