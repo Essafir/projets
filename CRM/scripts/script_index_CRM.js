@@ -826,7 +826,6 @@ function generateMonthlyData() {
 }
 
 // 🔥 NOUVEAU : Graphique de revenu mensuel
-// 🔥 NOUVEAU : Graphique de revenu mensuel
 function createRevenueLineChart() {
     const ctx = document.getElementById('revenueLineChart');
     if (!ctx) {
@@ -895,6 +894,14 @@ function createRevenueLineChart() {
         }
     });
 }
+
+function updateCharts() {
+    console.log("🔄 Mise à jour des graphiques");
+    createStatusPieChart();
+    createMonthlyLineChart();
+    createRevenueLineChart(); // 🔥
+}
+
 // ==============================
 // AUTHENTIFICATION - CORRIGÉE
 // ==============================
