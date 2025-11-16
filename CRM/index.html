@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini CRM - Gestion des Clients</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="./styles/style_index_CRM.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header Professionnel -->
@@ -22,7 +27,7 @@
                         <p class="app-subtitle">Gestion Professionnelle des Clients</p>
                     </div>
                 </div>
-                
+
                 <div class="user-section">
                     <div class="user-profile">
                         <div class="user-avatar">
@@ -63,7 +68,7 @@
                             <div class="stat-label">Clients Total</div>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card success">
                         <div class="stat-icon">
                             <i class="fas fa-chart-line"></i>
@@ -73,7 +78,7 @@
                             <div class="stat-label">Taux d'Activité</div>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card warning">
                         <div class="stat-icon">
                             <i class="fas fa-user-check"></i>
@@ -83,7 +88,7 @@
                             <div class="stat-label">Clients Actifs</div>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card info">
                         <div class="stat-icon">
                             <i class="fas fa-calendar-plus"></i>
@@ -128,7 +133,7 @@
                         </div>
                         <canvas id="statusPieChart"></canvas>
                     </div>
-                    
+
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3>Évolution Mensuelle</h3>
@@ -168,18 +173,14 @@
                     <div class="search-group">
                         <div class="search-input-container">
                             <i class="fas fa-search search-icon"></i>
-                            <input
-                                type="text"
-                                id="searchInput"
-                                class="search-input"
-                                placeholder="Rechercher un client..."
-                            />
+                            <input type="text" id="searchInput" class="search-input"
+                                placeholder="Rechercher un client..." />
                             <button class="clear-search" id="clearSearchBtn">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="filter-group">
                         <select id="statusFilter" class="filter-select">
                             <option value="">Tous les statuts</option>
@@ -187,19 +188,25 @@
                             <option value="inactif">Inactif</option>
                             <option value="lead">Lead</option>
                         </select>
-                        
+
                         <select id="sortBy" class="filter-select">
                             <option value="name">Trier par nom</option>
                             <option value="date">Trier par date</option>
                             <option value="status">Trier par statut</option>
                         </select>
                     </div>
-                    
+
                     <div class="action-group">
-                        <button id="exportBtn" class="btn btn-outline">
-                            <i class="fas fa-download"></i>
-                            Exporter
-                        </button>
+                        <div class="export-dropdown">
+                            <select id="exportType" class="filter-select">
+                                <option value="csv">Exporter en CSV</option>
+                                <option value="pdf">Exporter en PDF</option>
+                            </select>
+                            <button id="exportBtn" class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                Exporter
+                            </button>
+                        </div>
                         <button id="addClientBtn" class="btn btn-primary">
                             <i class="fas fa-user-plus"></i>
                             Nouveau Client
@@ -240,54 +247,39 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
+
             <form id="clientForm" class="modal-form">
                 <input type="hidden" id="clientId" />
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="clientName" class="form-label">
                             <i class="fas fa-signature"></i>
                             Nom du client *
                         </label>
-                        <input
-                            type="text"
-                            id="clientName"
-                            class="form-input"
-                            required
-                            placeholder="Entrez le nom complet"
-                        />
+                        <input type="text" id="clientName" class="form-input" required
+                            placeholder="Entrez le nom complet" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="clientEmail" class="form-label">
                             <i class="fas fa-envelope"></i>
                             Adresse email *
                         </label>
-                        <input
-                            type="email"
-                            id="clientEmail"
-                            class="form-input"
-                            required
-                            placeholder="client@entreprise.com"
-                        />
+                        <input type="email" id="clientEmail" class="form-input" required
+                            placeholder="client@entreprise.com" />
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="clientPhone" class="form-label">
                             <i class="fas fa-phone"></i>
                             Téléphone
                         </label>
-                        <input
-                            type="tel"
-                            id="clientPhone"
-                            class="form-input"
-                            placeholder="+33 1 23 45 67 89"
-                        />
+                        <input type="tel" id="clientPhone" class="form-input" placeholder="+33 1 23 45 67 89" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="clientStatus" class="form-label">
                             <i class="fas fa-tag"></i>
@@ -300,13 +292,9 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="closeClientModal()"
-                    >
+                    <button type="button" class="btn btn-secondary" onclick="closeClientModal()">
                         <i class="fas fa-times"></i>
                         Annuler
                     </button>
@@ -321,4 +309,5 @@
 
     <script src="./scripts/script_index_CRM.js"></script>
 </body>
+
 </html>

@@ -92,6 +92,7 @@ function applyFilters() {
 
     filteredProjects = clientProjects.filter((project) => {
         const displayStatus = getDisplayStatus(project);
+        const isPaid = (project.paidAmount || 0) >= (project.amount || 0);
 
         const matchesSearch =
             !searchTerm ||
@@ -101,8 +102,8 @@ function applyFilters() {
         const matchesStatus = !statusValue || project.status === statusValue;
 
         const matchesPayment = !paymentValue ||
-            (paymentValue === "paid" && project.isPaid) ||
-            (paymentValue === "unpaid" && !project.isPaid);
+            (paymentValue === "paid" && isPaid) ||
+            (paymentValue === "unpaid" && !isPaid);
 
         return matchesSearch && matchesStatus && matchesPayment;
     });
@@ -156,6 +157,10 @@ function displayProjects(projectsToDisplay) {
     projectsToDisplay.forEach((project) => {
         const displayStatus = getDisplayStatus(project);
         const isOverdue = displayStatus === "en_retard";
+        const paidAmount = project.paidAmount || 0;
+        const totalAmount = project.amount || 0;
+        const remaining = totalAmount - paidAmount;
+        const isFullyPaid = paidAmount >= totalAmount;
 
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -174,10 +179,13 @@ function displayProjects(projectsToDisplay) {
             </td>
             <td data-label="Montant (MAD)">
                 <div style="font-weight: 600; color: var(--dark);">
-                    ${project.amount ? project.amount.toLocaleString('fr-FR') + ' MAD' : '—'}
+                    ${totalAmount ? totalAmount.toLocaleString('fr-FR') + ' MAD' : '—'}
                 </div>
-                <div style="font-size: 0.85rem; ${project.isPaid ? 'color: var(--success);' : 'color: var(--gray);'}">
-                    ${project.isPaid ? '<i class="fas fa-check-circle"></i> Payé' : '<i class="fas fa-clock"></i> Non payé'}
+                <div style="font-size: 0.85rem; color: var(--gray);">
+                    Payé: ${paidAmount.toLocaleString('fr-FR')} MAD
+                </div>
+                <div style="font-size: 0.85rem; ${isFullyPaid ? 'color: var(--success); font-weight: 600;' : 'color: var(--danger);'}">
+                    Reste: ${remaining.toLocaleString('fr-FR')} MAD
                 </div>
             </td>
             <td data-label="Date création">
@@ -216,13 +224,16 @@ function updateStatistics() {
         p.status !== "terminé" && p.dueDate && new Date(p.dueDate) < now
     ).length;
 
+    // 🔥 Calcul basé sur paidAmount
     const monthlyRevenue = clientProjects
-        .filter(p => p.isPaid && new Date(p.createdAt).getMonth() === currentMonth && new Date(p.createdAt).getFullYear() === currentYear)
-        .reduce((sum, p) => sum + (p.amount || 0), 0);
+        .filter(p => {
+            const created = new Date(p.createdAt);
+            return created.getMonth() === currentMonth && created.getFullYear() === currentYear;
+        })
+        .reduce((sum, p) => sum + (p.paidAmount || 0), 0);
 
     const totalRevenue = clientProjects
-        .filter(p => p.isPaid)
-        .reduce((sum, p) => sum + (p.amount || 0), 0);
+        .reduce((sum, p) => sum + (p.paidAmount || 0), 0);
 
     if (totalProjectsElement) totalProjectsElement.textContent = total;
     if (activeProjectsElement) activeProjectsElement.textContent = active;
@@ -264,7 +275,8 @@ function openAddModal() {
     projectForm.reset();
     document.getElementById("projectId").value = "";
     document.getElementById("projectStatus").value = "en_cours";
-    document.getElementById("projectIsPaid").checked = false;
+    // Valeur par défaut pour paidAmount
+    document.getElementById("projectPaidAmount").value = "0";
     
     const today = new Date().toISOString().split("T")[0];
     const dueDateInput = document.getElementById("projectDueDate");
@@ -293,17 +305,22 @@ function handleFormSubmit(e) {
     const status = document.getElementById("projectStatus").value;
     const dueDate = document.getElementById("projectDueDate").value;
     const amount = parseFloat(document.getElementById("projectAmount").value) || 0;
-    const isPaid = document.getElementById("projectIsPaid").checked;
+    const paidAmount = parseFloat(document.getElementById("projectPaidAmount").value) || 0;
 
     if (!title || amount <= 0) {
-        showAlert("Le titre et un montant > 0 sont obligatoires", "error");
+        showAlert("Le titre et un montant total > 0 sont obligatoires", "error");
+        return;
+    }
+
+    if (paidAmount > amount) {
+        showAlert("Le montant payé ne peut pas être supérieur au montant total", "error");
         return;
     }
 
     if (projectId) {
-        updateProject(projectId, { title, description, status, dueDate, amount, isPaid });
+        updateProject(projectId, { title, description, status, dueDate, amount, paidAmount });
     } else {
-        addProject({ title, description, status, dueDate, amount, isPaid });
+        addProject({ title, description, status, dueDate, amount, paidAmount });
     }
 
     closeModal();
@@ -321,7 +338,7 @@ function addProject(projectData) {
         status: projectData.status,
         dueDate: projectData.dueDate,
         amount: projectData.amount,
-        isPaid: projectData.isPaid,
+        paidAmount: projectData.paidAmount || 0, // 🔥
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     };
@@ -351,7 +368,7 @@ function editProject(projectId) {
         document.getElementById("projectStatus").value = project.status;
         document.getElementById("projectDueDate").value = project.dueDate || "";
         document.getElementById("projectAmount").value = project.amount || "";
-        document.getElementById("projectIsPaid").checked = project.isPaid || false;
+        document.getElementById("projectPaidAmount").value = project.paidAmount || 0; // 🔥
         projectModal.style.display = "block";
     }
 }

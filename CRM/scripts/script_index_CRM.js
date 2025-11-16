@@ -265,7 +265,7 @@ function setupEventListeners() {
     
     // Boutons d'action
     if (elements.exportBtn) {
-        elements.exportBtn.addEventListener("click", exportToCSV);
+        elements.exportBtn.addEventListener("click", handleExport); // 🔥 Changé
     }
     
     if (elements.addClientBtn) {
@@ -418,6 +418,9 @@ function loadClients() {
         }
     });
 
+    // 🔥 Charger les projets ici
+    const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+
     // Mettre à jour l'interface
     if (elements.clientsCount) {
         elements.clientsCount.textContent = filteredClients.length;
@@ -426,7 +429,7 @@ function loadClients() {
     if (filteredClients.length === 0) {
         showEmptyState();
     } else {
-        showClientsTable(filteredClients);
+        showClientsTable(filteredClients, projects); // 🔥 ajout du paramètre
     }
     
     console.log(`📋 ${filteredClients.length} clients affichés`);
@@ -667,8 +670,8 @@ function updateStatistics() {
     // 🔥 Calcul du revenu total (tous les projets payés)
     const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
     const totalRevenue = projects
-        .filter(p => p.isPaid)
-        .reduce((sum, p) => sum + (p.amount || 0), 0);
+        .filter(p => (p.paidAmount || 0) >= (p.amount || 0))
+        .reduce((sum, p) => sum + (p.paidAmount || 0), 0);
 
     // Mettre à jour les éléments
     if (elements.totalClients) elements.totalClients.textContent = total;
@@ -823,6 +826,7 @@ function generateMonthlyData() {
 }
 
 // 🔥 NOUVEAU : Graphique de revenu mensuel
+// 🔥 NOUVEAU : Graphique de revenu mensuel
 function createRevenueLineChart() {
     const ctx = document.getElementById('revenueLineChart');
     if (!ctx) {
@@ -838,10 +842,10 @@ function createRevenueLineChart() {
     const monthlyRevenue = new Array(12).fill(0);
 
     projects
-        .filter(p => p.isPaid)
+        .filter(p => (p.paidAmount || 0) >= (p.amount || 0))
         .forEach(p => {
             const month = new Date(p.createdAt).getMonth();
-            monthlyRevenue[month] += p.amount || 0;
+            monthlyRevenue[month] += p.paidAmount || 0;
         });
 
     revenueChart = new Chart(ctx, {
@@ -891,14 +895,6 @@ function createRevenueLineChart() {
         }
     });
 }
-
-function updateCharts() {
-    console.log("🔄 Mise à jour des graphiques");
-    createStatusPieChart();
-    createMonthlyLineChart();
-    createRevenueLineChart(); // 🔥
-}
-
 // ==============================
 // AUTHENTIFICATION - CORRIGÉE
 // ==============================
@@ -917,9 +913,20 @@ function handleLogout() {
 }
 
 // ==============================
-// EXPORT CSV AMÉLIORÉ
+// EXPORT CSV / PDF
 // ==============================
 
+function handleExport() {
+    const exportType = document.getElementById("exportType").value;
+
+    if (exportType === "csv") {
+        exportToCSV();
+    } else if (exportType === "pdf") {
+        exportToPDF();
+    }
+}
+
+// Export CSV
 function exportToCSV() {
     if (clients.length === 0) {
         showAlert("Aucun client à exporter", "warning");
@@ -937,8 +944,9 @@ function exportToCSV() {
         "Téléphone",
         "Statut",
         "Projets totaux",
-        "Revenu total (MAD)",
-        "Projets payés",
+        "Montant total (MAD)",
+        "Montant payé (MAD)",
+        "Montant restant (MAD)",
         "Date création",
     ];
     let csvContent = BOM + headers.join(";") + "\n";
@@ -949,11 +957,10 @@ function exportToCSV() {
         );
         const totalProjects = clientProjects.length;
         
-        // 🔥 Calcul du revenu et des projets payés
-        const paidProjects = clientProjects.filter(p => p.isPaid).length;
-        const revenue = clientProjects
-            .filter(p => p.isPaid)
-            .reduce((sum, p) => sum + (p.amount || 0), 0);
+        // 🔥 Calcul des montants
+        const totalAmount = clientProjects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const paidAmount = clientProjects.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
+        const remaining = totalAmount - paidAmount;
 
         const row = [
             `"${client.id}"`,
@@ -962,8 +969,9 @@ function exportToCSV() {
             `"${client.phone || ""}"`,
             `"${getStatusText(client.status)}"`,
             `"${totalProjects}"`,
-            `"${revenue.toLocaleString('fr-FR')}"`,
-            `"${paidProjects}"`,
+            `"${totalAmount.toLocaleString('fr-FR')}"`,
+            `"${paidAmount.toLocaleString('fr-FR')}"`,
+            `"${remaining.toLocaleString('fr-FR')}"`,
             `"${formatDate(client.createdAt)}"`,
         ];
         csvContent += row.join(";") + "\n";
@@ -980,6 +988,61 @@ function exportToCSV() {
     showAlert("Export CSV détaillé réussi", "success");
 }
 
+// Export PDF
+function exportToPDF() {
+    if (clients.length === 0) {
+        showAlert("Aucun client à exporter", "warning");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const projects = JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+
+    const doc = new jsPDF();
+
+    // Titre
+    doc.setFontSize(18);
+    doc.text("Export des Clients", 14, 20);
+
+    // Date
+    doc.setFontSize(10);
+    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 30);
+
+    // En-têtes du tableau
+    const headers = ["Nom", "Email", "Statut", "Projets", "Total (MAD)", "Payé (MAD)", "Reste (MAD)"];
+
+    // Données du tableau
+    const data = clients.map(client => {
+        const clientProjects = projects.filter(p => p.clientId === client.id);
+        const totalAmount = clientProjects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const paidAmount = clientProjects.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
+        const remaining = totalAmount - paidAmount;
+
+        return [
+            client.name,
+            client.email,
+            getStatusText(client.status),
+            clientProjects.length,
+            totalAmount.toLocaleString('fr-FR'),
+            paidAmount.toLocaleString('fr-FR'),
+            remaining.toLocaleString('fr-FR')
+        ];
+    });
+
+    // Générer le tableau
+    doc.autoTable({
+        head: [headers],
+        body: data,
+        startY: 40,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [67, 97, 238], textColor: [255, 255, 255] }
+    });
+
+    // Télécharger le PDF
+    doc.save(`clients_export_${new Date().toISOString().split("T")[0]}.pdf`);
+    showAlert("Export PDF réussi", "success");
+}
+
 // ==============================
 // FONCTIONS GLOBALES
 // ==============================
@@ -993,7 +1056,7 @@ window.clearSearch = clearSearch;
 window.openClientModal = openClientModal;
 
 // Fonction pour afficher le tableau des clients
-function showClientsTable(filteredClients) {
+function showClientsTable(filteredClients, projects) { // 🔥 Ajout du paramètre
     let tableHTML = `
         <div class="table-responsive">
             <table class="clients-table">
@@ -1002,6 +1065,7 @@ function showClientsTable(filteredClients) {
                         <th>Client</th>
                         <th>Contact</th>
                         <th>Statut</th>
+                        <th>Montant (MAD)</th> <!-- 🔥 Colonne ajoutée -->
                         <th>Date création</th>
                         <th>Actions</th>
                     </tr>
@@ -1010,6 +1074,13 @@ function showClientsTable(filteredClients) {
     `;
 
     filteredClients.forEach((client) => {
+        // 🔥 Calculer les montants
+        const clientProjects = projects.filter(p => p.clientId === client.id);
+        const totalAmount = clientProjects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const paidAmount = clientProjects.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
+        const remaining = totalAmount - paidAmount;
+        const isFullyPaid = remaining <= 0;
+
         tableHTML += `
             <tr>
                 <td data-label="Client">
@@ -1027,6 +1098,18 @@ function showClientsTable(filteredClients) {
                     <span class="status-badge status-${client.status}">
                         ${getStatusText(client.status)}
                     </span>
+                </td>
+                <!-- 🔥 NOUVELLE COLONNE -->
+                <td data-label="Montant (MAD)">
+                    <div style="font-weight: 600; color: var(--dark);">
+                        ${totalAmount.toLocaleString('fr-FR')} MAD
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--gray);">
+                        Payé: ${paidAmount.toLocaleString('fr-FR')} MAD
+                    </div>
+                    <div style="font-size: 0.85rem; ${isFullyPaid ? 'color: var(--success); font-weight: 600;' : 'color: var(--danger);'}">
+                        Reste: ${remaining.toLocaleString('fr-FR')} MAD
+                    </div>
                 </td>
                 <td data-label="Date création">
                     <small>${formatDate(client.createdAt)}</small>

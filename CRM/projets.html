@@ -119,7 +119,7 @@
       </main>
     </div>
 
-    <!-- Modal pour ajouter/modifier un projet - CORRIGÉ -->
+    <!-- Modal pour ajouter/modifier un projet - MIS À JOUR -->
     <div id="projectModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -181,10 +181,11 @@
             <input type="date" id="projectDueDate" class="form-input" />
           </div>
 
+          <!-- 🔥 CHAMPS MIS À JOUR -->
           <div class="form-group">
             <label for="projectAmount" class="form-label">
               <i class="fas fa-money-bill-wave"></i>
-              Montant (MAD) *
+              Montant total (MAD) *
             </label>
             <input
               type="number"
@@ -197,12 +198,20 @@
             />
           </div>
 
-          <div class="form-group form-checkbox">
-            <label class="checkbox-label">
-              <input type="checkbox" id="projectIsPaid" />
-              <span class="checkbox-custom"></span>
-              Payé par le client
+          <div class="form-group">
+            <label for="projectPaidAmount" class="form-label">
+              <i class="fas fa-hand-holding-usd"></i>
+              Montant payé (MAD)
             </label>
+            <input
+              type="number"
+              id="projectPaidAmount"
+              class="form-input"
+              min="0"
+              step="100"
+              placeholder="Ex: 2500"
+              value="0"
+            />
           </div>
 
           <div class="form-actions">
@@ -223,7 +232,6 @@
       </div>
     </div>
 
-    
     <script src="scripts/script_projets_CRM.js"></script>
   </body>
 </html>
